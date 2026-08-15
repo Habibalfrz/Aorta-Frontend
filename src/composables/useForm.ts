@@ -1,4 +1,4 @@
-import { ref, Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { ZodType, ZodError } from 'zod'
 
 export function useForm<T extends Record<string, any>>(
@@ -24,7 +24,7 @@ export function useForm<T extends Record<string, any>>(
       const zodError = result.error as ZodError
       const newErrors: Record<string, string> = {}
 
-      zodError.errors.forEach((err) => {
+      zodError.issues.forEach((err: any) => {
         if (err.path && err.path.length > 0) {
           const field = err.path.join('.')
           // Keep only the first error for each field
@@ -87,6 +87,7 @@ export function useForm<T extends Record<string, any>>(
   }
 
   return {
+    
     data,
     errors,
     isSubmitting,

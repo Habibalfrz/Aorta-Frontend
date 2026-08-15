@@ -1,10 +1,14 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/login'
+    name: 'Landing',
+    component: () => import('../modules/Public/views/LandingView.vue'),
+    meta: {
+      guestOnly: true
+    }
   },
   {
     path: '/login',
@@ -15,20 +19,18 @@ const routes: Array<RouteRecordRaw> = [
     }
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('../modules/Dashboard/views/DashboardView.vue'),
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
     path: '/ess',
-    name: 'ESS',
-    component: () => import('../modules/Dashboard/views/DashboardView.vue'), // Borrow dashboard component for now
+    component: () => import('../layouts/MainLayout.vue'),
     meta: {
       requiresAuth: true
-    }
+    },
+    children: [
+      {
+        path: '',
+        name: 'Dashboard',
+        component: () => import('../modules/Dashboard/views/DashboardView.vue'),
+      }
+    ]
   }
 ]
 
@@ -38,7 +40,7 @@ const router = createRouter({
 })
 
 // Global Navigation Guard
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   // Initialize auth store inside the guard to avoid Pinia active instance error
   const authStore = useAuthStore()
 

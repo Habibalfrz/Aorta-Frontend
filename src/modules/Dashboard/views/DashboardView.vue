@@ -1,70 +1,128 @@
-<template>
-  <div>
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-slate-900">Selamat Datang di Portal ESS, [Nama Pegawai]</h1>
-      <p class="text-slate-500 mt-2">Ringkasan informasi dan akses layanan mandiri pegawai.</p>
-    </div>
-
-    <!-- Grid Layout for Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-      <!-- Card 1: Profil -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-          Profil Pegawai
-        </h2>
-        <div class="space-y-3 text-sm text-slate-600">
-          <div>
-            <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Nama Lengkap</p>
-            <p class="font-medium text-slate-900">Budi Santoso</p>
-          </div>
-          <div>
-            <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Jabatan</p>
-            <p class="font-medium text-slate-900">Senior Nurse</p>
-          </div>
-          <div>
-            <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Departemen</p>
-            <p class="font-medium text-slate-900">Rawat Inap</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 2: Kehadiran -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-          Status Kehadiran
-        </h2>
-        <div class="flex flex-col h-full justify-between">
-          <div>
-            <p class="text-sm text-slate-600 mb-2">Status Hari Ini</p>
-            <div class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium text-sm border border-emerald-200">
-              Jam Masuk: 08:00 - Tepat Waktu
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 3: Akses Modul -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">
-          Akses Cepat
-        </h2>
-        <div class="space-y-3">
-          <button class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-2.5 px-4 rounded-lg transition-colors border border-blue-200 text-left flex items-center justify-between">
-            Buka Layanan IT/Ticketing
-            <span class="text-blue-500">→</span>
-          </button>
-          <button class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium py-2.5 px-4 rounded-lg transition-colors border border-indigo-200 text-left flex items-center justify-between">
-            Buka HRIS
-            <span class="text-indigo-500">→</span>
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-// Dashboard View
+import { useAuthStore } from '@/store/auth'
+import EssLayout from '@/layouts/EssLayout.vue'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Clock, Calendar, BellRing } from 'lucide-vue-next'
+
+const authStore = useAuthStore()
+
+// Dummy data for presentation
+const leaveBalance = 8
+const totalLeave = 12
+const leavePercentage = (leaveBalance / totalLeave) * 100
 </script>
+
+<template>
+  <EssLayout>
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
+        Selamat Datang, {{ authStore.user?.name || 'User' }}
+      </h1>
+      <p class="text-slate-500 mt-1">Ringkasan informasi dan akses layanan mandiri pegawai.</p>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      
+      <!-- Profil & Kehadiran (Kiri, lebih lebar) -->
+      <div class="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Widget 1: Profil -->
+        <Card class="border-slate-200 shadow-sm">
+          <CardHeader class="pb-2">
+            <CardTitle class="text-lg text-slate-800">Profil Singkat</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="flex items-start gap-4 pt-2">
+              <Avatar class="w-16 h-16 border border-slate-100">
+                <AvatarImage src="" alt="Avatar" />
+                <AvatarFallback class="bg-blue-100 text-blue-700 text-xl font-medium">
+                  {{ authStore.user?.name?.charAt(0).toUpperCase() || 'U' }}
+                </AvatarFallback>
+              </Avatar>
+              <div class="space-y-1">
+                <h3 class="font-semibold text-slate-900 text-lg">{{ authStore.user?.name || 'Nama Pegawai' }}</h3>
+                <p class="text-slate-500 text-sm">{{ authStore.roles[0] || 'Jabatan/Posisi' }}</p>
+                <div class="inline-flex mt-2 items-center px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
+                  ID: {{ authStore.user?.id?.substring(0, 8) || 'EMP-001' }}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <!-- Widget 2: Kehadiran -->
+        <Card class="border-slate-200 shadow-sm flex flex-col">
+          <CardHeader class="pb-2">
+            <CardTitle class="text-lg text-slate-800 flex items-center gap-2">
+              <Clock class="w-5 h-5 text-blue-600" />
+              Kehadiran Hari Ini
+            </CardTitle>
+          </CardHeader>
+          <CardContent class="flex-grow flex flex-col justify-between pt-2">
+            <div>
+              <p class="text-sm text-slate-500 mb-1">Shift Reguler (08:00 - 17:00)</p>
+              <div class="flex items-center gap-2 mt-2">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span class="text-sm font-medium text-slate-700">Belum Clock In</span>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mt-6">
+              <Button class="w-full bg-blue-600 hover:bg-blue-700 text-white">Clock In</Button>
+              <Button variant="outline" class="w-full" disabled>Clock Out</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Sisi Kanan (Sempit) -->
+      <div class="md:col-span-4 space-y-6">
+        
+        <!-- Widget 3: Sisa Cuti -->
+        <Card class="border-slate-200 shadow-sm">
+          <CardHeader class="pb-2">
+            <CardTitle class="text-lg text-slate-800 flex items-center gap-2">
+              <Calendar class="w-5 h-5 text-indigo-600" />
+              Sisa Cuti Tahunan
+            </CardTitle>
+          </CardHeader>
+          <CardContent class="pt-4">
+            <div class="flex justify-between items-end mb-2">
+              <span class="text-3xl font-bold text-slate-900">{{ leaveBalance }} <span class="text-sm font-normal text-slate-500">hari</span></span>
+              <span class="text-sm text-slate-500">dari {{ totalLeave }} hari</span>
+            </div>
+            <Progress :model-value="leavePercentage" class="h-2 bg-slate-100" />
+            <p class="text-xs text-slate-500 mt-3">Diperbarui: Hari ini</p>
+          </CardContent>
+        </Card>
+
+        <!-- Widget 4: Notifikasi / Pengumuman -->
+        <Card class="border-slate-200 shadow-sm">
+          <CardHeader class="pb-2">
+            <CardTitle class="text-lg text-slate-800 flex items-center gap-2">
+              <BellRing class="w-5 h-5 text-amber-500" />
+              Pengumuman HR
+            </CardTitle>
+          </CardHeader>
+          <CardContent class="pt-4">
+            <div class="flex flex-col items-center justify-center py-8 text-center px-4 bg-slate-50 rounded-lg border border-slate-100 border-dashed">
+              <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center mb-3">
+                <BellRing class="w-5 h-5 text-slate-400" />
+              </div>
+              <p class="text-sm font-medium text-slate-700">Belum ada pengumuman</p>
+              <p class="text-xs text-slate-500 mt-1">Pengumuman dari HR akan muncul di sini.</p>
+            </div>
+          </CardContent>
+        </Card>
+
+      </div>
+    </div>
+  </EssLayout>
+</template>

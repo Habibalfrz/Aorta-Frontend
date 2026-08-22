@@ -20,7 +20,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/ess',
-    component: () => import('../layouts/MainLayout.vue'),
+    component: () => import('../layouts/EssLayout.vue'),
     meta: {
       requiresAuth: true
     },

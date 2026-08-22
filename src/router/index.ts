@@ -31,8 +31,42 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../modules/Dashboard/views/DashboardView.vue'),
       }
     ]
+  },
+  {
+    path: '/admin-portal',
+    component: () => import('../layouts/SysAdminLayout.vue'),
+    meta: {
+      requiresAuth: true
+    },
+    children: [
+      {
+        path: '',
+        name: 'System Monitor',
+        component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
+      },
+      {
+        path: 'health',
+        name: 'System Health',
+        component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
+      },
+      {
+        path: 'logs',
+        name: 'Error Logs',
+        component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
+      },
+      {
+        path: 'roles',
+        name: 'Role Access',
+        component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
+      },
+      {
+        path: 'metrics',
+        name: 'API Metrics',
+        component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
+      }
+    ]
   }
-]
+];
 
 const history = import.meta.env.VITE_APP_PLATFORM === 'desktop' 
   ? createWebHashHistory() 

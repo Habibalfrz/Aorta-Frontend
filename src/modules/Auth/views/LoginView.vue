@@ -1,74 +1,92 @@
-<template>
-  <div class="min-h-screen flex">
-    <!-- Left: Banner/Info -->
-    <div class="hidden lg:flex lg:w-1/2 bg-blue-900 text-white flex-col justify-center px-12">
-      <h1 class="text-4xl font-bold mb-4">AORTA OS</h1>
-      <p class="text-blue-200 text-lg">Sistem Operasi Rumah Sakit Terintegrasi</p>
-    </div>
-
-    <!-- Right: Login Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center bg-white p-8">
-      <div class="w-full max-w-md">
-        <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Login ESS Portal</h2>
-
-        <form @submit.prevent="handleLogin" class="space-y-6">
-          <BaseInput
-            id="username"
-            label="Username"
-            v-model="loginForm.data.value.username"
-            :error="loginForm.errors.value.username"
-            placeholder="Masukkan username"
-          />
-
-          <BaseInput
-            id="password"
-            type="password"
-            label="Password"
-            v-model="loginForm.data.value.password"
-            :error="loginForm.errors.value.password"
-            placeholder="Masukkan password"
-          />
-
-          <button
-            type="submit"
-            :disabled="loginForm.isSubmitting.value"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50"
-          >
-            {{ loginForm.isSubmitting.value ? 'Memproses...' : 'Login' }}
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { z } from 'zod';
-import { useRouter } from 'vue-router';
-import { useForm } from '@/composables/useForm';
-import BaseInput from '@/components/BaseInput.vue';
-import { useAuthStore } from '@/store/auth'; // Ensure this path matches the actual store path
+import { z } from 'zod'
+import { useRouter } from 'vue-router'
+import { useForm } from '@/composables/useForm'
+import { useAuthStore } from '@/store/auth'
+import AuthLayout from '@/layouts/AuthLayout.vue'
 
-const router = useRouter();
-const authStore = useAuthStore();
+// Shadcn UI Components
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
-const loginForm = useForm(
+const router = useRouter()
+const authStore = useAuthStore()
+
+const form = useForm(
   z.object({
-    username: z.string().min(1, 'Username diperlukan'),
-    password: z.string().min(1, 'Password diperlukan')
+    email: z.string().email('Format email tidak valid'),
+    password: z.string().min(1, 'Password tidak boleh kosong')
   }),
-  { username: '', password: '' }
-);
+  { email: '', password: '' }
+)
 
 const handleLogin = async () => {
-  if (loginForm.validate()) {
-    try {
-      // Simulate API call
-      await authStore.login('dummy-token-123');
-      router.push('/ess');
-    } catch (e) {
-      console.error('Login failed', e);
-    }
+  if (!form.validate()) return
+
+  form.isSubmitting.value = true
+  try {
+    // API call diganti di sini nantinya
+    authStore.login('dummy-token-123')
+    router.push(authStore.determineLandingRoute())
+  } catch (error) {
+    form.setApiErrors(error)
+  } finally {
+    form.isSubmitting.value = false
   }
-};
+}
 </script>
+
+<template>
+  <AuthLayout>
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-2xl font-bold text-slate-900">Login ESS Portal</CardTitle>
+        <CardDescription>Masukkan kredensial Anda untuk masuk ke sistem.</CardDescription>
+      </CardHeader>
+      
+      <form @submit.prevent="handleLogin">
+        <CardContent class="space-y-4">
+          <!-- Global API Error -->
+          <div v-if="form.errors.value._global" class="p-3 bg-red-50 text-red-600 rounded-md text-sm">
+            {{ form.errors.value._global }}
+          </div>
+
+          <div class="space-y-2">
+            <Label for="email">Email</Label>
+            <Input 
+              id="email" 
+              type="email" 
+              v-model="form.data.value.email" 
+              placeholder="nama@rs.com" 
+              :class="{ 'border-red-500': form.errors.value.email }"
+            />
+            <p v-if="form.errors.value.email" class="text-sm text-red-500">{{ form.errors.value.email }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <Label for="password">Password</Label>
+            <Input 
+              id="password" 
+              type="password" 
+              v-model="form.data.value.password" 
+              :class="{ 'border-red-500': form.errors.value.password }"
+            />
+            <p v-if="form.errors.value.password" class="text-sm text-red-500">{{ form.errors.value.password }}</p>
+          </div>
+        </CardContent>
+
+        <CardFooter>
+          <Button 
+            type="submit" 
+            class="w-full bg-blue-600 hover:bg-blue-700" 
+            :disabled="form.isSubmitting.value"
+          >
+            {{ form.isSubmitting.value ? 'Memproses...' : 'Masuk' }}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  </AuthLayout>
+</template>

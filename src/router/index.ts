@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 
 const routes: Array<RouteRecordRaw> = [
@@ -34,8 +34,12 @@ const routes: Array<RouteRecordRaw> = [
   }
 ]
 
+const history = import.meta.env.VITE_APP_PLATFORM === 'desktop' 
+  ? createWebHashHistory() 
+  : createWebHistory()
+
 const router = createRouter({
-  history: createWebHistory(),
+  history,
   routes
 })
 

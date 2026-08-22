@@ -65,8 +65,42 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
       }
     ]
+  },
+  {
+    path: '/hris',
+    component: () => import('../layouts/HrisLayout.vue'),
+    meta: {
+      requiresAuth: true
+    },
+    children: [
+      {
+        path: '',
+        name: 'HR Dashboard',
+        component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+      },
+      {
+        path: 'employees',
+        name: 'Data Pegawai',
+        component: () => import('../modules/HRIS/views/EmployeeListView.vue'),
+      },
+      {
+        path: 'shifts',
+        name: 'Manajemen Shift',
+        component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+      },
+      {
+        path: 'leaves',
+        name: 'Pengajuan Cuti',
+        component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+      },
+      {
+        path: 'payroll',
+        name: 'Payroll',
+        component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+      }
+    ]
   }
-];
+];;
 
 const history = import.meta.env.VITE_APP_PLATFORM === 'desktop' 
   ? createWebHashHistory() 

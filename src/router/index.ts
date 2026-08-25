@@ -58,7 +58,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'roles',
         name: 'Role Access',
-        component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
+        component: () => import('../modules/SysAdmin/views/RoleManagementView.vue'),
       },
       {
         path: 'metrics',

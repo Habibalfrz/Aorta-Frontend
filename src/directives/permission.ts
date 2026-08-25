@@ -6,13 +6,14 @@ export const permissionDirective = {
     const authStore = useAuthStore()
     const { value } = binding
 
-    // Bypass for Superadmin
-    if (authStore.hasRole('Superadmin')) {
+    // Bypass for Superadmin (case-insensitive via hasRole implementation)
+    if (authStore.hasRole('superadmin')) {
       return
     }
 
     // Check if permission is provided
     if (value && typeof value === 'string') {
+      // Exact match for dot-notation permissions
       const hasAccess = authStore.hasPermission(value)
 
       if (!hasAccess) {

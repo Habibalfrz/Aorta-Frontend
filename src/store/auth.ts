@@ -39,7 +39,10 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   const hasRole = computed(() => {
-    return (role: string): boolean => roles.value.includes(role)
+    return (role: string): boolean => {
+      const lowerRole = role.toLowerCase()
+      return roles.value.some(r => r.toLowerCase() === lowerRole)
+    }
   })
 
   // Actions
@@ -101,7 +104,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function determineLandingRoute(): string {
-    if (hasRole.value('Superadmin')) {
+    if (hasRole.value('superadmin')) {
       return '/admin-portal'
     }
 

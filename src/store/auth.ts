@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { jwtDecode } from 'jwt-decode'
 import router from '../router'
+import api from '@/api/axios'
 
 export interface User {
   id: string
@@ -16,11 +17,18 @@ const NAMEID_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
 const EMAIL_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
 const NAME_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
 
+// Helper to normalize claims that can be either string or array of strings
+function normalizeArrayClaim(claimValue: any): string[] {
+  if (!claimValue) return []
+  return Array.isArray(claimValue) ? claimValue : [claimValue]
+}
+
 export const useAuthStore = defineStore('auth', () => {
   // State
   const token = ref<string | null>(localStorage.getItem('access_token'))
   const user = ref<User | null>(null)
   const roles = ref<string[]>([])
+  const modules = ref<string[]>([])
   const permissions = ref<string[]>([])
 
   // Getters
@@ -39,6 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!token.value) {
       user.value = null
       roles.value = []
+      modules.value = []
       permissions.value = []
       return
     }
@@ -48,18 +57,17 @@ export const useAuthStore = defineStore('auth', () => {
 
       // Extract User
       user.value = {
-        id: decoded[NAMEID_CLAIM] || decoded.sub || '',
-        name: decoded[NAME_CLAIM] || decoded.name || '',
-        email: decoded[EMAIL_CLAIM] || decoded.email || '',
+        id: decoded.sub || decoded[NAMEID_CLAIM] || '',
+        name: decoded.unique_name || decoded[NAME_CLAIM] || decoded.name || '',
+        email: decoded.email || decoded[EMAIL_CLAIM] || '',
       }
 
-      // Extract Roles (Handle both single string and array from .NET)
-      const tokenRoles = decoded[ROLE_CLAIM] || decoded.role || []
-      roles.value = Array.isArray(tokenRoles) ? tokenRoles : [tokenRoles]
+      // Extract Roles & Modules (Handle both single string and array from .NET)
+      roles.value = normalizeArrayClaim(decoded.RoleId || decoded[ROLE_CLAIM] || decoded.role)
+      modules.value = normalizeArrayClaim(decoded.modules)
 
       // Extract Permissions (custom claim, assuming 'permissions' or 'Permission')
-      const tokenPermissions = decoded.permissions || decoded.Permission || []
-      permissions.value = Array.isArray(tokenPermissions) ? tokenPermissions : [tokenPermissions]
+      permissions.value = normalizeArrayClaim(decoded.permissions || decoded.Permission)
 
     } catch (error) {
       console.error('Failed to decode JWT token:', error)
@@ -67,27 +75,36 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function login(newToken: string) {
-    token.value = newToken
-    localStorage.setItem('access_token', newToken)
-    extractTokenData()
+  async function login(payload: any) {
+    try {
+      const response = await api.post('/api/Auth/login', payload)
+      const newToken = response.data.token
+
+      token.value = newToken
+      localStorage.setItem('access_token', newToken)
+      extractTokenData()
+
+      return response
+    } catch (error) {
+      throw error
+    }
   }
 
   function logout() {
     token.value = null
     user.value = null
     roles.value = []
+    modules.value = []
     permissions.value = []
     localStorage.removeItem('access_token')
     router.push('/login')
   }
 
   function determineLandingRoute(): string {
-    if (roles.value.length === 1 && roles.value[0] === 'Superadmin') {
+    if (hasRole.value('Superadmin')) {
       return '/admin-portal'
     }
 
-    // Multi-role or default regular users
     return '/ess'
   }
 
@@ -100,6 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     user,
     roles,
+    modules,
     permissions,
     isAuthenticated,
     hasPermission,

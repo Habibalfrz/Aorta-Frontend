@@ -36,7 +36,8 @@ const routes: Array<RouteRecordRaw> = [
     path: '/admin-portal',
     component: () => import('../layouts/SysAdminLayout.vue'),
     meta: {
-      requiresAuth: true
+      requiresAuth: true,
+      permissions: ['sysadmin.access']
     },
     children: [
       {
@@ -70,7 +71,8 @@ const routes: Array<RouteRecordRaw> = [
     path: '/hris',
     component: () => import('../layouts/HrisLayout.vue'),
     meta: {
-      requiresAuth: true
+      requiresAuth: true,
+      permissions: ['hris.access']
     },
     children: [
       {
@@ -82,28 +84,49 @@ const routes: Array<RouteRecordRaw> = [
         path: 'employees',
         name: 'Data Pegawai',
         component: () => import('../modules/HRIS/views/EmployeeListView.vue'),
+        meta: {
+          permissions: ['hris.employees.view']
+        }
       },
       {
         path: 'shifts',
         name: 'Manajemen Shift',
         component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+        meta: {
+          permissions: ['hris.shifts.view']
+        }
       },
       {
         path: 'leaves',
         name: 'Pengajuan Cuti',
         component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+        meta: {
+          permissions: ['hris.leaves.view']
+        }
       },
       {
         path: 'payroll',
         name: 'Payroll',
         component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+        meta: {
+          permissions: ['hris.payroll.view']
+        }
       }
     ]
+  },
+  // Add a 403 Forbidden route
+  {
+    path: '/403',
+    name: 'Forbidden',
+    component: () => import('../modules/Auth/views/LoginView.vue'), // Fallback for now
+    meta: {
+      requiresAuth: true
+    }
   }
-];;
+];
 
-const history = import.meta.env.VITE_APP_PLATFORM === 'desktop' 
-  ? createWebHashHistory() 
+const history = import.meta.env.VITE_APP_PLATFORM === 'desktop'
+  ? createWebHashHistory()
   : createWebHistory()
 
 const router = createRouter({
@@ -119,13 +142,41 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     // If route requires auth and user is not authenticated, redirect to login
     next('/login')
-  } else if (to.meta.guestOnly && authStore.isAuthenticated) {
+    return
+  }
+
+  if (to.meta.guestOnly && authStore.isAuthenticated) {
     // If route is guest only (e.g. login) and user is authenticated, redirect to landing route
     next(authStore.determineLandingRoute())
-  } else {
-    // Otherwise, allow navigation
-    next()
+    return
   }
+
+  // Permission Based RBAC Checking
+  if (to.meta.requiresAuth && authStore.isAuthenticated) {
+    // Superadmin bypass
+    if (authStore.hasRole('Superadmin')) {
+      next()
+      return
+    }
+
+    // Check specific route permissions
+    const routePermissions = to.meta.permissions as string[] | undefined
+
+    if (routePermissions && routePermissions.length > 0) {
+      // Check if user has AT LEAST ONE of the required permissions
+      const hasAccess = routePermissions.some(permission => authStore.hasPermission(permission))
+
+      if (!hasAccess) {
+        // Redirect to ESS fallback or 403
+        console.warn(`Access denied to route: ${String(to.name)}. Missing permissions.`)
+        next('/ess')
+        return
+      }
+    }
+  }
+
+  // Otherwise, allow navigation
+  next()
 })
 
 export default router

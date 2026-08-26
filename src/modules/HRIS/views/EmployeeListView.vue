@@ -198,20 +198,25 @@ const handleEmployeeCreated = (_id: string) => {
         <!-- Header -->
         <div class="p-6 bg-white border-b border-slate-200">
           <SheetHeader>
-            <div class="flex items-start gap-4">
-              <Avatar class="w-16 h-16 border border-slate-200 shadow-sm">
-                <AvatarImage src="" />
-                <AvatarFallback class="bg-indigo-100 text-indigo-700 text-xl font-semibold">
-                  {{ selectedEmployee?.fullName?.charAt(0) || 'U' }}
-                </AvatarFallback>
-              </Avatar>
-              <div class="pt-1">
-                <SheetTitle class="text-xl text-slate-900">{{ selectedEmployee?.fullName }}</SheetTitle>
-                <SheetDescription class="text-sm mt-1 flex flex-col gap-1">
-                  <span class="font-mono text-slate-500">{{ selectedEmployee?.employeeNumber }}</span>
-                  <span class="text-slate-700 font-medium">{{ selectedEmployee?.position || 'Posisi belum diatur' }} &bull; {{ selectedEmployee?.department || 'Departemen belum diatur' }}</span>
-                </SheetDescription>
+            <div class="flex items-start justify-between">
+              <div class="flex items-start gap-4">
+                <Avatar class="w-16 h-16 border border-slate-200 shadow-sm">
+                  <AvatarImage src="" />
+                  <AvatarFallback class="bg-indigo-100 text-indigo-700 text-xl font-semibold">
+                    {{ selectedEmployee?.fullName?.charAt(0) || 'U' }}
+                  </AvatarFallback>
+                </Avatar>
+                <div class="pt-1">
+                  <SheetTitle class="text-xl text-slate-900">{{ selectedEmployee?.fullName }}</SheetTitle>
+                  <SheetDescription class="text-sm mt-1 flex flex-col gap-1">
+                    <span class="font-mono text-slate-500">{{ selectedEmployee?.employeeNumber }}</span>
+                    <span class="text-slate-700 font-medium">{{ selectedEmployee?.position || 'Posisi belum diatur' }} &bull; {{ selectedEmployee?.department || 'Departemen belum diatur' }}</span>
+                  </SheetDescription>
+                </div>
               </div>
+              <Button variant="outline" size="sm" @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null">
+                Lihat Lengkap
+              </Button>
             </div>
           </SheetHeader>
         </div>

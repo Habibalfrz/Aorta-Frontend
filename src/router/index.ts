@@ -89,6 +89,14 @@ const routes: Array<RouteRecordRaw> = [
         }
       },
       {
+        path: 'employees/:id',
+        name: 'Detail Pegawai',
+        component: () => import('../modules/HRIS/views/EmployeeDetailView.vue'),
+        meta: {
+          permissions: ['hris.employees.view']
+        }
+      },
+      {
         path: 'shifts',
         name: 'Manajemen Shift',
         component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback

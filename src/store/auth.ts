@@ -17,6 +17,9 @@ const NAMEID_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
 const EMAIL_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
 const NAME_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
 
+// Custom schema fallback for permissions if backend uses full schema URIs
+const PERMISSION_CLAIM = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/permission'
+
 // Helper to normalize claims that can be either string or array of strings
 function normalizeArrayClaim(claimValue: any): string[] {
   if (!claimValue) return []
@@ -66,11 +69,13 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       // Extract Roles & Modules (Handle both single string and array from .NET)
-      roles.value = normalizeArrayClaim(decoded.RoleId || decoded[ROLE_CLAIM] || decoded.role)
+      roles.value = normalizeArrayClaim(decoded.role || decoded.roles || decoded.RoleId || decoded[ROLE_CLAIM])
       modules.value = normalizeArrayClaim(decoded.modules)
 
-      // Extract Permissions (custom claim, assuming 'permissions' or 'Permission')
-      permissions.value = normalizeArrayClaim(decoded.permissions || decoded.Permission)
+      // Extract Permissions (custom claim, assuming 'permission', 'permissions' or full schema URL)
+      permissions.value = normalizeArrayClaim(decoded.permission || decoded.permissions || decoded.Permission || decoded[PERMISSION_CLAIM])
+
+      console.log('DECODED JWT:', decoded)
 
     } catch (error) {
       console.error('Failed to decode JWT token:', error)

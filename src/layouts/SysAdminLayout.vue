@@ -109,8 +109,20 @@ const backToESS = () => {
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto p-8">
-        <div class="max-w-7xl mx-auto">
+      <main class="flex-1 overflow-y-auto p-8 relative">
+        <!-- Fallback UI if roles extraction fails -->
+        <div v-if="authStore.roles.length === 0" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-50/80 backdrop-blur-sm">
+          <div class="text-center space-y-4 max-w-md p-6 bg-white rounded-lg shadow-xl border border-slate-200">
+            <AlertTriangle class="w-12 h-12 text-amber-500 mx-auto" />
+            <h3 class="text-lg font-semibold text-slate-900">Data Autentikasi Tidak Lengkap</h3>
+            <p class="text-sm text-slate-500">
+              Kami mengalami kendala saat membaca hak akses Anda. Silakan coba muat ulang atau login kembali.
+            </p>
+            <Button variant="outline" @click="handleLogout" class="mt-4">Login Ulang</Button>
+          </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto" v-else>
           <slot />
         </div>
       </main>

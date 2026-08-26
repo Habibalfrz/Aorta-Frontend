@@ -162,7 +162,7 @@ router.beforeEach((to, _from, next) => {
   // Permission Based RBAC Checking
   if (to.meta.requiresAuth && authStore.isAuthenticated) {
     // Superadmin bypass
-    if (authStore.hasRole('Superadmin')) {
+    if (authStore.hasRole('Superadmin') || authStore.hasRole('superadmin')) {
       next()
       return
     }

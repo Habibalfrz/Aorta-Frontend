@@ -7,8 +7,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   LineChart,
-  LogOut,
-  ArrowLeft
+  LogOut
 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,10 +33,6 @@ const navigation = [
 
 const handleLogout = () => {
   authStore.logout()
-}
-
-const backToESS = () => {
-  router.push('/ess')
 }
 </script>
 
@@ -72,16 +67,8 @@ const backToESS = () => {
 
       <!-- Bottom Actions -->
       <div class="p-4 border-t border-slate-800 space-y-2">
-        <Button 
-          variant="outline" 
-          class="w-full justify-start bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-          @click="backToESS"
-        >
-          <ArrowLeft class="w-4 h-4 mr-2" />
-          Back to ESS
-        </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           class="w-full justify-start text-slate-400 hover:bg-red-950/30 hover:text-red-400"
           @click="handleLogout"
         >

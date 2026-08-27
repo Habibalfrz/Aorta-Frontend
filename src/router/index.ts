@@ -37,13 +37,18 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../layouts/SysAdminLayout.vue'),
     meta: {
       requiresAuth: true,
-      permissions: ['sysadmin.access']
+      permissions: []
     },
     children: [
       {
         path: '',
-        name: 'System Monitor',
+        name: 'SysAdminDashboard',
         component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
+      },
+      {
+        path: 'roles',
+        name: 'RoleManagement',
+        component: () => import('../modules/SysAdmin/views/RoleManagementView.vue'),
       },
       {
         path: 'health',
@@ -54,11 +59,6 @@ const routes: Array<RouteRecordRaw> = [
         path: 'logs',
         name: 'Error Logs',
         component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
-      },
-      {
-        path: 'roles',
-        name: 'Role Access',
-        component: () => import('../modules/SysAdmin/views/RoleManagementView.vue'),
       },
       {
         path: 'metrics',

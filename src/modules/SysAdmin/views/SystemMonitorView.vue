@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import SysAdminLayout from '@/layouts/SysAdminLayout.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Cpu, MemoryStick, Activity, Users, Ticket, Package } from 'lucide-vue-next'
 
@@ -8,7 +7,7 @@ const router = useRouter()
 </script>
 
 <template>
-  <SysAdminLayout>
+  <div>
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-slate-900 tracking-tight">The Gateway</h1>
       <p class="text-sm text-slate-500 mt-1">Superadmin Portal & System Monitoring</p>
@@ -103,5 +102,5 @@ const router = useRouter()
         </Card>
       </div>
     </div>
-  </SysAdminLayout>
+  </div>
 </template>

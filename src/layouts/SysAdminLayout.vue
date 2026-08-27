@@ -110,7 +110,7 @@ const handleLogout = () => {
         </div>
 
         <div class="max-w-7xl mx-auto" v-else>
-          <slot />
+          <router-view />
         </div>
       </main>
     </div>

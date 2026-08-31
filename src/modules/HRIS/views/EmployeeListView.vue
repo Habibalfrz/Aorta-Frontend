@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import HrisLayout from '@/layouts/HrisLayout.vue'
 import EmployeeForm from '../components/EmployeeForm.vue'
-import { Card } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -51,6 +51,7 @@ const isLoading = ref(true)
 const searchQuery = ref('')
 const isDetailOpen = ref(false)
 const selectedEmployee = ref<Employee | null>(null)
+const isLoaded = ref(false)
 
 // Form Dialog State
 const isFormOpen = ref(false)
@@ -84,105 +85,125 @@ const fetchEmployees = async () => {
 
 onMounted(() => {
   fetchEmployees()
+  requestAnimationFrame(() => {
+    isLoaded.value = true
+  })
 })
 
 const handleEmployeeCreated = (_id: string) => {
   fetchEmployees()
 }
+
+const deleteEmployeeById = async (emp: Employee) => {
+  if (!confirm(`Hapus pegawai ${emp.fullName}?`)) return
+
+  try {
+    await api.delete(`/api/hris/employees/${emp.id}`)
+    toast.success('Pegawai berhasil dihapus')
+    fetchEmployees()
+  } catch (error: any) {
+    console.error('Failed to delete employee:', error)
+    toast.error(error.response?.data?.message || 'Gagal menghapus pegawai')
+  }
+}
 </script>
 
 <template>
-  <HrisLayout>
-    <div class="flex items-center justify-between mb-6">
+  <div class="h-full space-y-8 max-w-[1400px]">
+    <div class="transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] flex items-center justify-between"
+         :class="isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Data Pegawai</h1>
-        <p class="text-sm text-slate-500">Kelola informasi, posisi, dan status seluruh pegawai rumah sakit.</p>
+        <h1 class="text-3xl font-bold tracking-tight text-foreground">Data Pegawai</h1>
+        <p class="text-sm text-muted-foreground mt-1 font-medium">Kelola informasi, posisi, dan status seluruh pegawai rumah sakit.</p>
       </div>
       <!-- Add permission protection to the add button -->
-      <Button v-permission="'hris.employees.write'" class="bg-indigo-600 hover:bg-indigo-700" @click="isFormOpen = true">
-        <Plus class="w-4 h-4 mr-2" />
+      <Button v-permission="'hris.employees.write'" class="h-10 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm" @click="isFormOpen = true">
+        <Plus class="w-4 h-4" />
         Tambah Pegawai
       </Button>
     </div>
 
     <!-- Data Table Card -->
-    <Card class="shadow-sm border-slate-200">
+    <div class="bg-card/80 backdrop-blur-xl border border-border/60 rounded-3xl shadow-sm overflow-hidden transition-all duration-700 delay-100 ease-out flex flex-col"
+         :class="isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'">
       <!-- Toolbar -->
-      <div class="p-4 border-b border-slate-200 flex items-center justify-between gap-4 bg-white rounded-t-lg">
+      <div class="p-6 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/20">
         <div class="flex items-center gap-2 flex-1">
           <div class="relative w-full max-w-sm">
-            <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+            <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               v-model="searchQuery"
               placeholder="Cari NIK atau Nama..."
-              class="pl-9 bg-slate-50 border-slate-200"
+              class="w-full pl-10 pr-4 h-11 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-foreground"
             />
           </div>
-          <Button variant="outline" class="border-slate-200">
-            <Filter class="w-4 h-4 mr-2 text-slate-500" />
+          <Button variant="outline" class="h-11 px-4 bg-card border border-border text-foreground text-xs font-bold rounded-xl hover:bg-accent transition-colors flex items-center gap-2 shadow-sm">
+            <Filter class="w-4 h-4 mr-2" />
             Filter
           </Button>
         </div>
-        <div class="text-sm text-slate-500 font-medium">
-          Total: {{ employees.length }} Pegawai
+        <div class="text-xs font-medium text-muted-foreground">
+          Menampilkan <span class="font-bold text-foreground">{{ employees.length }}</span> Pegawai
         </div>
       </div>
 
       <!-- Table -->
-      <div class="rounded-b-lg overflow-hidden bg-white">
-        <Table>
-          <TableHeader class="bg-slate-50 border-b border-slate-200">
-            <TableRow class="hover:bg-transparent">
-              <TableHead class="w-[150px] font-semibold text-slate-700">NIK</TableHead>
-              <TableHead class="font-semibold text-slate-700">Nama Lengkap</TableHead>
-              <TableHead class="font-semibold text-slate-700">Gender</TableHead>
-              <TableHead class="font-semibold text-slate-700">Departemen</TableHead>
-              <TableHead class="w-[100px] font-semibold text-slate-700">Status</TableHead>
-              <TableHead class="w-[70px] text-right font-semibold text-slate-700"></TableHead>
+      <div class="overflow-x-auto custom-scrollbar">
+        <Table class="w-full text-left border-collapse min-w-[800px]">
+          <TableHeader class="bg-muted/30 border-b border-border/50">
+            <TableRow class="hover:bg-transparent border-b-0">
+              <TableHead class="w-[150px] font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">NIK</TableHead>
+              <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Nama Lengkap</TableHead>
+              <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Gender</TableHead>
+              <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Departemen</TableHead>
+              <TableHead class="w-[100px] font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Status</TableHead>
+              <TableHead class="w-[70px] text-right font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Opsi</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody class="divide-y divide-border/30">
             <TableRow v-if="isLoading">
-              <TableCell colspan="6" class="h-24 text-center text-slate-500">
+              <TableCell colspan="6" class="h-24 text-center text-muted-foreground font-medium text-sm">
                 Memuat data pegawai...
               </TableCell>
             </TableRow>
             <template v-else>
               <TableRow
-                v-for="emp in employees"
+                v-for="(emp, index) in employees"
                 :key="emp.id"
-                class="cursor-pointer hover:bg-slate-50"
+                class="cursor-pointer hover:bg-accent/50 transition-colors group"
+                :style="{ transitionDelay: `${(index + 1) * 50}ms` }"
                 @click="openDetail(emp)"
               >
-                <TableCell class="font-mono text-sm text-slate-600">{{ emp.employeeNumber }}</TableCell>
-                <TableCell class="font-medium text-slate-900">{{ emp.fullName }}</TableCell>
-                <TableCell class="text-slate-600">{{ emp.gender === 'L' ? 'Laki-laki' : (emp.gender === 'P' ? 'Perempuan' : emp.gender) }}</TableCell>
-                <TableCell class="text-slate-600">{{ emp.department || 'Belum diatur' }}</TableCell>
-                <TableCell>
-                  <Badge :variant="getStatusVariant(emp.status)" class="font-medium">
+                <TableCell class="font-mono text-sm font-bold text-muted-foreground px-6 py-4">{{ emp.employeeNumber }}</TableCell>
+                <TableCell class="font-bold text-foreground text-sm tracking-tight px-6 py-4">{{ emp.fullName }}</TableCell>
+                <TableCell class="text-muted-foreground text-xs font-medium px-6 py-4">{{ emp.gender === 'L' ? 'Laki-laki' : (emp.gender === 'P' ? 'Perempuan' : emp.gender) }}</TableCell>
+                <TableCell class="text-muted-foreground text-xs font-medium px-6 py-4">{{ emp.department || 'Belum diatur' }}</TableCell>
+                <TableCell class="px-6 py-4">
+                  <Badge :variant="getStatusVariant(emp.status)" class="text-[10px] font-bold uppercase tracking-wider">
                     {{ emp.status || 'Aktif' }}
                   </Badge>
                 </TableCell>
-                <TableCell class="text-right" @click.stop>
+                <TableCell class="text-right px-6 py-4" @click.stop>
                   <DropdownMenu>
                     <DropdownMenuTrigger as-child>
-                      <Button variant="ghost" class="h-8 w-8 p-0 text-slate-500 hover:text-slate-900">
+                      <Button variant="ghost" class="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
                         <span class="sr-only">Buka menu</span>
                         <MoreHorizontal class="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" class="w-40">
-                      <DropdownMenuItem @click="openDetail(emp)">Lihat Detail</DropdownMenuItem>
+                    <DropdownMenuContent align="end" class="w-48 rounded-xl border-border/60 shadow-lg p-1 bg-popover text-popover-foreground">
+                      <DropdownMenuItem @click="openDetail(emp)" class="rounded-lg cursor-pointer text-xs font-medium hover:bg-accent focus:bg-accent">Lihat Detail</DropdownMenuItem>
                       <div v-permission="'hris.employees.write'">
-                        <DropdownMenuItem>Edit Data</DropdownMenuItem>
-                        <DropdownMenuItem class="text-red-600">Nonaktifkan</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem @click="toast.info('Fitur edit pegawai akan dilanjutkan pada fase detail form')" class="rounded-lg cursor-pointer text-xs font-medium hover:bg-accent focus:bg-accent">Edit Data</DropdownMenuItem>
+                        <DropdownMenuItem @click="deleteEmployeeById(emp)" class="rounded-lg cursor-pointer text-xs font-medium text-destructive hover:bg-destructive/10 focus:text-destructive focus:bg-destructive/10">Hapus</DropdownMenuItem>
                       </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
               <TableRow v-if="employees.length === 0">
-                <TableCell colspan="6" class="h-24 text-center text-slate-500">
+                <TableCell colspan="6" class="h-24 text-center text-muted-foreground text-sm font-medium">
                   Tidak ada data pegawai.
                 </TableCell>
               </TableRow>
@@ -190,7 +211,7 @@ const handleEmployeeCreated = (_id: string) => {
           </TableBody>
         </Table>
       </div>
-    </Card>
+    </div>
 
     <!-- Side Sheet / Drawer for Details -->
     <Sheet v-model:open="isDetailOpen">
@@ -304,5 +325,5 @@ const handleEmployeeCreated = (_id: string) => {
       v-model:open="isFormOpen"
       @success="handleEmployeeCreated"
     />
-  </HrisLayout>
+  </div>
 </template>

@@ -37,9 +37,9 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <Card class="border-slate-200 shadow-sm">
-      <CardHeader class="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
-        <CardTitle class="text-lg text-slate-800">Kredensial & Lisensi</CardTitle>
+    <Card class="bg-card/50 backdrop-blur-md border-border/50 shadow-sm rounded-2xl">
+      <CardHeader class="pb-3 border-b border-border/50 flex flex-row items-center justify-between">
+        <CardTitle class="text-lg font-bold tracking-tight text-foreground">Kredensial & Lisensi</CardTitle>
       </CardHeader>
       <CardContent class="pt-6">
         <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -47,9 +47,9 @@ onMounted(() => {
         </div>
 
         <div v-else-if="credentials.length > 0" class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <div v-for="cred in credentials" :key="cred.id" class="p-5 border border-slate-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow">
+          <div v-for="cred in credentials" :key="cred.id" class="p-5 border border-border/50 rounded-xl bg-muted/30 hover:bg-muted/50 shadow-sm hover:shadow-md transition-all">
             <div class="flex justify-between items-start mb-4">
-              <h3 class="font-semibold text-slate-900 pr-4">{{ cred.type }}</h3>
+              <h3 class="font-semibold text-foreground pr-4">{{ cred.type }}</h3>
               <Badge variant="outline" class="bg-emerald-50 text-emerald-700 border-emerald-200 shrink-0">
                 {{ cred.status }}
               </Badge>
@@ -57,18 +57,18 @@ onMounted(() => {
 
             <div class="space-y-3">
               <div>
-                <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Nomor Dokumen</p>
-                <p class="text-sm font-mono font-medium text-slate-900">{{ cred.number }}</p>
+                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Nomor Dokumen</p>
+                <p class="text-sm font-mono font-medium text-foreground">{{ cred.number }}</p>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Tanggal Terbit</p>
-                  <p class="text-sm text-slate-700">{{ new Date(cred.issueDate).toLocaleDateString('id-ID') }}</p>
+                  <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Tanggal Terbit</p>
+                  <p class="text-sm text-foreground">{{ new Date(cred.issueDate).toLocaleDateString('id-ID') }}</p>
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Berlaku Hingga</p>
-                  <p class="text-sm font-medium" :class="new Date(cred.expiryDate) < new Date() ? 'text-red-600' : 'text-slate-700'">
+                  <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Berlaku Hingga</p>
+                  <p class="text-sm font-medium" :class="new Date(cred.expiryDate) < new Date() ? 'text-red-600' : 'text-foreground'">
                     {{ new Date(cred.expiryDate).toLocaleDateString('id-ID') }}
                   </p>
                 </div>
@@ -77,7 +77,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-else class="text-center py-12 text-slate-500">
+        <div v-else class="text-center py-12 text-muted-foreground">
           Tidak ada data kredensial atau lisensi yang terdaftar.
         </div>
       </CardContent>

@@ -38,9 +38,9 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <Card class="border-slate-200 shadow-sm">
-      <CardHeader class="pb-3 border-b border-slate-100">
-        <CardTitle class="text-lg text-slate-800">Riwayat Penempatan & Mutasi</CardTitle>
+    <Card class="bg-card/50 backdrop-blur-md border-border/50 shadow-sm rounded-2xl">
+      <CardHeader class="pb-3 border-b border-border/50">
+        <CardTitle class="text-lg font-bold tracking-tight text-foreground">Riwayat Penempatan & Mutasi</CardTitle>
       </CardHeader>
       <CardContent class="pt-6">
         <div v-if="isLoading" class="space-y-8">
@@ -58,29 +58,29 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-else-if="historyRecords.length > 0" class="relative border-l-2 border-slate-200 ml-3 md:ml-4 space-y-8 pb-4">
+        <div v-else-if="historyRecords.length > 0" class="relative border-l-2 border-border/50 ml-3 md:ml-4 space-y-8 pb-4">
           <div v-for="record in historyRecords" :key="record.id" class="relative pl-6 md:pl-8">
             <!-- Timeline dot -->
-            <span class="absolute -left-[9px] top-1 h-4 w-4 rounded-full bg-indigo-100 border-2 border-indigo-600"></span>
+            <span class="absolute -left-[9px] top-1 h-4 w-4 rounded-full bg-primary/20 border-2 border-primary"></span>
 
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-1">
-              <h3 class="text-base font-semibold text-slate-900">{{ record.title }}</h3>
-              <time class="text-sm font-medium text-slate-500 mt-1 sm:mt-0">
+              <h3 class="text-base font-semibold text-foreground">{{ record.title }}</h3>
+              <time class="text-sm font-medium text-muted-foreground mt-1 sm:mt-0">
                 {{ new Date(record.date).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) }}
               </time>
             </div>
 
-            <p class="text-sm font-medium text-slate-700 mt-1">
-              {{ record.position }} <span class="text-slate-400 mx-1">&bull;</span> {{ record.department }}
+            <p class="text-sm font-medium text-foreground mt-1">
+              {{ record.position }} <span class="text-muted-foreground mx-1">&bull;</span> {{ record.department }}
             </p>
 
-            <p v-if="record.notes" class="text-sm text-slate-600 mt-2 bg-slate-50 p-3 rounded-md border border-slate-100">
+            <p v-if="record.notes" class="text-sm text-muted-foreground mt-2 bg-muted/30 p-3 rounded-xl border border-border/50">
               {{ record.notes }}
             </p>
           </div>
         </div>
 
-        <div v-else class="text-center py-12 text-slate-500">
+        <div v-else class="text-center py-12 text-muted-foreground">
           Belum ada riwayat penempatan yang tercatat.
         </div>
       </CardContent>

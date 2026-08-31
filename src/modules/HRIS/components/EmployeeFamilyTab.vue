@@ -36,18 +36,18 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <Card class="border-slate-200 shadow-sm">
-      <CardHeader class="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
-        <CardTitle class="text-lg text-slate-800">Data Keluarga & Kontak Darurat</CardTitle>
+    <Card class="bg-card/50 backdrop-blur-md border-border/50 shadow-sm rounded-2xl">
+      <CardHeader class="pb-3 border-b border-border/50 flex flex-row items-center justify-between">
+        <CardTitle class="text-lg font-bold tracking-tight text-foreground">Data Keluarga & Kontak Darurat</CardTitle>
       </CardHeader>
       <CardContent class="pt-6">
         <div v-if="isLoading" class="space-y-4">
           <Skeleton class="h-20 w-full" v-for="i in 2" :key="i" />
         </div>
 
-        <div v-else-if="familyMembers.length > 0" class="overflow-x-auto rounded-lg border border-slate-200">
+        <div v-else-if="familyMembers.length > 0" class="overflow-x-auto rounded-lg border border-border/50">
           <table class="w-full text-sm text-left">
-            <thead class="bg-slate-50 text-slate-700 font-medium border-b border-slate-200">
+            <thead class="bg-muted/30 text-muted-foreground uppercase tracking-widest text-[10px] border-b border-border/50">
               <tr>
                 <th class="px-4 py-3">Nama Lengkap</th>
                 <th class="px-4 py-3">Hubungan</th>
@@ -56,28 +56,28 @@ onMounted(() => {
                 <th class="px-4 py-3">Kontak Darurat</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-for="member in familyMembers" :key="member.id" class="hover:bg-slate-50/50">
-                <td class="px-4 py-3 font-medium text-slate-900">{{ member.name }}</td>
-                <td class="px-4 py-3 text-slate-600">{{ member.relation }}</td>
-                <td class="px-4 py-3 text-slate-600">{{ member.gender }}</td>
-                <td class="px-4 py-3 text-slate-600">{{ new Date(member.dateOfBirth).toLocaleDateString('id-ID') }}</td>
+            <tbody class="divide-y divide-border/30">
+              <tr v-for="member in familyMembers" :key="member.id" class="hover:bg-accent/50 transition-colors">
+                <td class="px-4 py-3 font-medium text-foreground">{{ member.name }}</td>
+                <td class="px-4 py-3 text-muted-foreground">{{ member.relation }}</td>
+                <td class="px-4 py-3 text-muted-foreground">{{ member.gender }}</td>
+                <td class="px-4 py-3 text-muted-foreground">{{ new Date(member.dateOfBirth).toLocaleDateString('id-ID') }}</td>
                 <td class="px-4 py-3">
                   <div v-if="member.emergencyContact" class="flex flex-col">
                     <span class="inline-flex items-center text-emerald-600 font-medium text-xs mb-1">
                       <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                       Ya
                     </span>
-                    <span class="text-slate-500 text-xs font-mono">{{ member.phone }}</span>
+                    <span class="text-muted-foreground text-xs font-mono">{{ member.phone }}</span>
                   </div>
-                  <span v-else class="text-slate-400">-</span>
+                  <span v-else class="text-muted-foreground">-</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div v-else class="text-center py-12 text-slate-500">
+        <div v-else class="text-center py-12 text-muted-foreground">
           Tidak ada data keluarga yang didaftarkan.
         </div>
       </CardContent>

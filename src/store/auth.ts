@@ -8,6 +8,9 @@ export interface User {
   id: string
   name: string
   email: string
+  is_superadmin?: boolean
+  is_simulating?: boolean
+  simulated_by_user_id?: string
   [key: string]: any
 }
 
@@ -29,20 +32,28 @@ function normalizeArrayClaim(claimValue: any): string[] {
 export const useAuthStore = defineStore('auth', () => {
   // State
   const token = ref<string | null>(localStorage.getItem('access_token'))
+  const originalToken = ref<string | null>(localStorage.getItem('original_access_token')) // To store real superadmin token during simulation
   const user = ref<User | null>(null)
   const roles = ref<string[]>([])
   const modules = ref<string[]>([])
   const permissions = ref<string[]>([])
+  const simulatableRoles = ref<any[]>([]) // Store dynamic roles for the current module
 
   // Getters
   const isAuthenticated = computed(() => !!token.value)
+  const isSimulating = computed(() => !!user.value?.is_simulating)
+  const isSuperadmin = computed(() => user.value?.is_superadmin === true)
 
   const hasPermission = computed(() => {
-    return (permission: string): boolean => permissions.value.includes(permission)
+    return (permission: string): boolean => {
+      if (user.value?.is_superadmin && !user.value?.is_simulating) return true
+      return permissions.value.includes(permission)
+    }
   })
 
   const hasRole = computed(() => {
     return (role: string): boolean => {
+      if (user.value?.is_superadmin && !user.value?.is_simulating) return true
       const lowerRole = role.toLowerCase()
       return roles.value.some(r => r.toLowerCase() === lowerRole)
     }
@@ -61,21 +72,26 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const decoded: any = jwtDecode(token.value)
 
+      // Handle custom claims for simulation and superadmin
+      const isSuperadminClaim = decoded.is_superadmin === 'true' || decoded.is_superadmin === true
+      const isSimulatingClaim = !!decoded.simulated_by_user_id
+
       // Extract User
       user.value = {
         id: decoded.sub || decoded[NAMEID_CLAIM] || '',
         name: decoded.unique_name || decoded[NAME_CLAIM] || decoded.name || '',
         email: decoded.email || decoded[EMAIL_CLAIM] || '',
+        is_superadmin: isSuperadminClaim,
+        is_simulating: isSimulatingClaim,
+        simulated_by_user_id: decoded.simulated_by_user_id
       }
 
-      // Extract Roles & Modules (Handle both single string and array from .NET)
+      // Extract Roles & Modules
       roles.value = normalizeArrayClaim(decoded.role || decoded.roles || decoded.RoleId || decoded[ROLE_CLAIM])
       modules.value = normalizeArrayClaim(decoded.modules)
 
-      // Extract Permissions (custom claim, assuming 'permission', 'permissions' or full schema URL)
+      // Extract Permissions
       permissions.value = normalizeArrayClaim(decoded.permission || decoded.permissions || decoded.Permission || decoded[PERMISSION_CLAIM])
-
-      console.log('DECODED JWT:', decoded)
 
     } catch (error) {
       console.error('Failed to decode JWT token:', error)
@@ -90,29 +106,88 @@ export const useAuthStore = defineStore('auth', () => {
 
       token.value = newToken
       localStorage.setItem('access_token', newToken)
-      extractTokenData()
+      localStorage.removeItem('original_access_token') // Clear any stale simulation token
+      originalToken.value = null
 
+      extractTokenData()
       return response
     } catch (error) {
       throw error
     }
   }
 
+  // --- Role Simulation Actions ---
+
+  async function fetchSimulatableRoles(moduleName: string) {
+    // Only fetch if genuinely superadmin (not currently simulating someone else)
+    if (!isSuperadmin.value || isSimulating.value) return []
+
+    try {
+      const response = await api.get(`/api/Auth/simulatable-roles?module=${moduleName}`)
+      simulatableRoles.value = response.data.data || []
+      return simulatableRoles.value
+    } catch (error) {
+      console.error('Failed to fetch simulatable roles:', error)
+      return []
+    }
+  }
+
+  async function simulateRole(roleName: string) {
+    if (!isSuperadmin.value || isSimulating.value) return
+
+    try {
+      const response = await api.post('/api/Auth/simulate-role', { role: roleName })
+      const newToken = response.data.token
+
+      // Save original superadmin token to allow reverting later
+      if (!originalToken.value) {
+        originalToken.value = token.value
+        localStorage.setItem('original_access_token', token.value as string)
+      }
+
+      // Apply simulated token
+      token.value = newToken
+      localStorage.setItem('access_token', newToken)
+      extractTokenData()
+
+      // Force reload to reset all app states / routers safely
+      window.location.reload()
+
+    } catch (error) {
+      console.error('Failed to simulate role:', error)
+      throw error
+    }
+  }
+
+  function stopSimulation() {
+    if (!isSimulating.value || !originalToken.value) return
+
+    // Revert to the original superadmin token
+    token.value = originalToken.value
+    localStorage.setItem('access_token', originalToken.value)
+    localStorage.removeItem('original_access_token')
+    originalToken.value = null
+
+    extractTokenData()
+    window.location.reload()
+  }
+
   function logout() {
     token.value = null
+    originalToken.value = null
     user.value = null
     roles.value = []
     modules.value = []
     permissions.value = []
     localStorage.removeItem('access_token')
-    router.push('/login')
+    localStorage.removeItem('original_access_token')
+    router.push('/')
   }
 
   function determineLandingRoute(): string {
-    if (hasRole.value('superadmin')) {
+    if (hasRole.value('superadmin') && !isSimulating.value) {
       return '/admin-portal'
     }
-
     return '/ess'
   }
 
@@ -127,12 +202,18 @@ export const useAuthStore = defineStore('auth', () => {
     roles,
     modules,
     permissions,
+    simulatableRoles,
     isAuthenticated,
+    isSimulating,
+    isSuperadmin,
     hasPermission,
     hasRole,
     login,
     logout,
     extractTokenData,
-    determineLandingRoute
+    determineLandingRoute,
+    fetchSimulatableRoles,
+    simulateRole,
+    stopSimulation
   }
 })

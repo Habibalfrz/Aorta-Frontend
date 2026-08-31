@@ -64,6 +64,26 @@ const routes: Array<RouteRecordRaw> = [
         path: 'metrics',
         name: 'API Metrics',
         component: () => import('../modules/SysAdmin/views/SystemMonitorView.vue'),
+      },
+      {
+        path: 'modules',
+        name: 'Modules Explorer',
+        component: () => import('../modules/SysAdmin/views/ModuleExplorerView.vue'),
+      },
+      {
+        path: 'profile',
+        name: 'Profil Saya',
+        component: () => import('../modules/Auth/views/ProfileSettingsView.vue'),
+      },
+      {
+        path: 'users',
+        name: 'UserManagement',
+        component: () => import('../modules/SysAdmin/views/UserManagementView.vue'),
+      },
+      {
+        path: 'permissions',
+        name: 'PermissionBuilder',
+        component: () => import('../modules/SysAdmin/views/PermissionBuilderView.vue'),
       }
     ]
   },
@@ -78,14 +98,17 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '',
         name: 'HR Dashboard',
-        component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+        component: () => import('../modules/HRIS/views/HrisDashboardView.vue'),
+        meta: {
+          permissions: ['hris.dashboard.read']
+        }
       },
       {
         path: 'employees',
         name: 'Data Pegawai',
         component: () => import('../modules/HRIS/views/EmployeeListView.vue'),
         meta: {
-          permissions: ['hris.employees.view']
+          permissions: ['hris.employees.read']
         }
       },
       {
@@ -93,31 +116,47 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Detail Pegawai',
         component: () => import('../modules/HRIS/views/EmployeeDetailView.vue'),
         meta: {
-          permissions: ['hris.employees.view']
+          permissions: ['hris.employees.read']
         }
       },
       {
         path: 'shifts',
         name: 'Manajemen Shift',
-        component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+        component: () => import('../modules/HRIS/views/ShiftManagementView.vue'),
         meta: {
-          permissions: ['hris.shifts.view']
+          permissions: ['hris.shifts.read']
+        }
+      },
+      {
+        path: 'attendance',
+        name: 'Log Kehadiran',
+        component: () => import('../modules/HRIS/views/AttendanceMonitorView.vue'),
+        meta: {
+          permissions: ['hris.attendance.read']
         }
       },
       {
         path: 'leaves',
         name: 'Pengajuan Cuti',
-        component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+        component: () => import('../modules/HRIS/views/LeaveManagementView.vue'),
         meta: {
-          permissions: ['hris.leaves.view']
+          permissions: ['hris.leaves.read']
         }
       },
       {
         path: 'payroll',
         name: 'Payroll',
-        component: () => import('../modules/HRIS/views/EmployeeListView.vue'), // Dummy fallback
+        component: () => import('../modules/HRIS/views/PayrollView.vue'),
         meta: {
-          permissions: ['hris.payroll.view']
+          permissions: ['hris.payroll.read']
+        }
+      },
+      {
+        path: 'settings',
+        name: 'HR Settings',
+        component: () => import('../modules/HRIS/views/HrisSettingsView.vue'),
+        meta: {
+          permissions: ['hris.settings.read']
         }
       }
     ]
@@ -142,29 +181,26 @@ const router = createRouter({
   routes
 })
 
-// Global Navigation Guard
-router.beforeEach((to, _from, next) => {
+// Global Navigation Guard (Vue Router 4 standard: return path instead of next())
+router.beforeEach((to, _from) => {
   // Initialize auth store inside the guard to avoid Pinia active instance error
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     // If route requires auth and user is not authenticated, redirect to login
-    next('/login')
-    return
+    return '/login'
   }
 
   if (to.meta.guestOnly && authStore.isAuthenticated) {
     // If route is guest only (e.g. login) and user is authenticated, redirect to landing route
-    next(authStore.determineLandingRoute())
-    return
+    return authStore.determineLandingRoute()
   }
 
   // Permission Based RBAC Checking
   if (to.meta.requiresAuth && authStore.isAuthenticated) {
     // Superadmin bypass
     if (authStore.hasRole('Superadmin') || authStore.hasRole('superadmin')) {
-      next()
-      return
+      return true
     }
 
     // Check specific route permissions
@@ -177,14 +213,13 @@ router.beforeEach((to, _from, next) => {
       if (!hasAccess) {
         // Redirect to ESS fallback or 403
         console.warn(`Access denied to route: ${String(to.name)}. Missing permissions.`)
-        next('/ess')
-        return
+        return '/ess'
       }
     }
   }
 
   // Otherwise, allow navigation
-  next()
+  return true
 })
 
 export default router

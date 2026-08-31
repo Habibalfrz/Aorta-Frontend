@@ -1,7 +1,13 @@
 <script setup lang="ts">
-// Main App Component
+import { RouterView } from 'vue-router'
+import { Toaster } from 'vue-sonner'
+import { useTheme } from '@/composables/useTheme'
+
+// Initialize theme globally
+useTheme()
 </script>
 
 <template>
-  <router-view />
+  <RouterView />
+  <Toaster position="top-right" rich-colors />
 </template>

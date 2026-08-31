@@ -95,71 +95,74 @@ const onSubmit = async () => {
 
 <template>
   <Dialog :open="open" @update:open="handleOpenChange">
-    <DialogContent class="sm:max-w-[425px]">
+    <DialogContent class="sm:max-w-[425px] bg-card border-border/60 rounded-3xl p-6 shadow-2xl">
       <DialogHeader>
-        <DialogTitle>Tambah Pegawai Baru</DialogTitle>
-        <DialogDescription>
+        <DialogTitle class="text-xl font-bold tracking-tight text-foreground">Tambah Pegawai Baru</DialogTitle>
+        <DialogDescription class="text-xs font-medium text-muted-foreground">
           Masukkan data informasi dasar pegawai. Klik simpan ketika selesai.
         </DialogDescription>
       </DialogHeader>
 
       <form @submit.prevent="onSubmit" class="space-y-4 py-4">
-        <div v-if="form.errors.value._global" class="p-3 bg-red-50 text-red-600 rounded-md text-sm mb-4">
+        <div v-if="form.errors.value._global" class="p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl text-sm mb-4 font-semibold">
           {{ form.errors.value._global }}
         </div>
 
         <div class="space-y-2">
-          <Label for="employeeNumber">Nomor Induk Kepegawaian (NIK) <span class="text-red-500">*</span></Label>
+          <Label for="employeeNumber" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nomor Induk Kepegawaian (NIK) <span class="text-destructive">*</span></Label>
           <Input
             id="employeeNumber"
             v-model="form.data.value.employeeNumber"
             placeholder="Contoh: EMP-2024-001"
-            :class="{ 'border-red-500': form.errors.value.employeeNumber }"
+            class="bg-muted/50 border-border/50 rounded-xl"
+            :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.employeeNumber }"
           />
-          <p v-if="form.errors.value.employeeNumber" class="text-sm text-red-500">{{ form.errors.value.employeeNumber }}</p>
+          <p v-if="form.errors.value.employeeNumber" class="text-xs font-bold text-destructive">{{ form.errors.value.employeeNumber }}</p>
         </div>
 
         <div class="space-y-2">
-          <Label for="fullName">Nama Lengkap <span class="text-red-500">*</span></Label>
+          <Label for="fullName" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nama Lengkap <span class="text-destructive">*</span></Label>
           <Input
             id="fullName"
             v-model="form.data.value.fullName"
             placeholder="Nama lengkap sesuai identitas"
-            :class="{ 'border-red-500': form.errors.value.fullName }"
+            class="bg-muted/50 border-border/50 rounded-xl"
+            :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.fullName }"
           />
-          <p v-if="form.errors.value.fullName" class="text-sm text-red-500">{{ form.errors.value.fullName }}</p>
+          <p v-if="form.errors.value.fullName" class="text-xs font-bold text-destructive">{{ form.errors.value.fullName }}</p>
         </div>
 
         <div class="space-y-2">
-          <Label for="dateOfBirth">Tanggal Lahir <span class="text-red-500">*</span></Label>
+          <Label for="dateOfBirth" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tanggal Lahir <span class="text-destructive">*</span></Label>
           <Input
             id="dateOfBirth"
             type="date"
             v-model="form.data.value.dateOfBirth"
-            :class="{ 'border-red-500': form.errors.value.dateOfBirth }"
+            class="bg-muted/50 border-border/50 rounded-xl"
+            :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.dateOfBirth }"
           />
-          <p v-if="form.errors.value.dateOfBirth" class="text-sm text-red-500">{{ form.errors.value.dateOfBirth }}</p>
+          <p v-if="form.errors.value.dateOfBirth" class="text-xs font-bold text-destructive">{{ form.errors.value.dateOfBirth }}</p>
         </div>
 
         <div class="space-y-2">
-          <Label for="gender">Jenis Kelamin <span class="text-red-500">*</span></Label>
+          <Label for="gender" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Jenis Kelamin <span class="text-destructive">*</span></Label>
           <Select v-model="form.data.value.gender">
-            <SelectTrigger :class="{ 'border-red-500': form.errors.value.gender }">
+            <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl" :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.gender }">
               <SelectValue placeholder="Pilih jenis kelamin" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="L">Laki-laki</SelectItem>
-              <SelectItem value="P">Perempuan</SelectItem>
+            <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
+              <SelectItem value="L" class="rounded-lg cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
+              <SelectItem value="P" class="rounded-lg cursor-pointer text-xs font-medium">Perempuan</SelectItem>
             </SelectContent>
           </Select>
-          <p v-if="form.errors.value.gender" class="text-sm text-red-500">{{ form.errors.value.gender }}</p>
+          <p v-if="form.errors.value.gender" class="text-xs font-bold text-destructive">{{ form.errors.value.gender }}</p>
         </div>
 
         <DialogFooter class="pt-4">
-          <Button variant="outline" type="button" @click="handleOpenChange(false)" :disabled="form.isSubmitting.value">
+          <Button variant="outline" type="button" @click="handleOpenChange(false)" :disabled="form.isSubmitting.value" class="rounded-xl font-bold text-xs h-10">
             Batal
           </Button>
-          <Button type="submit" class="bg-indigo-600 hover:bg-indigo-700" :disabled="form.isSubmitting.value">
+          <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs h-10 px-6 shadow-sm" :disabled="form.isSubmitting.value">
             {{ form.isSubmitting.value ? 'Menyimpan...' : 'Simpan Pegawai' }}
           </Button>
         </DialogFooter>

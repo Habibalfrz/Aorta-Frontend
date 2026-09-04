@@ -139,11 +139,15 @@ onMounted(() => {
         <div v-else-if="stats?.recentHires && stats.recentHires.length > 0" class="space-y-4">
           <div v-for="hire in stats.recentHires" :key="hire.id" class="flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/50 transition-colors">
             <div class="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center border border-primary/20">
-              {{ hire.name.charAt(0).toUpperCase() }}
+              {{ (hire.fullName || hire.name || 'U').charAt(0).toUpperCase() }}
             </div>
-            <div>
-              <p class="text-sm font-bold text-foreground">{{ hire.name }}</p>
-              <p class="text-xs text-muted-foreground font-mono">{{ hire.nik }}</p>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-foreground truncate">{{ hire.fullName || hire.name }}</p>
+              <div class="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                <span class="font-mono">{{ hire.employeeNumber || hire.nik }}</span>
+                <span v-if="hire.department" class="w-1 h-1 rounded-full bg-border"></span>
+                <span v-if="hire.department" class="truncate">{{ hire.department }}</span>
+              </div>
             </div>
           </div>
         </div>

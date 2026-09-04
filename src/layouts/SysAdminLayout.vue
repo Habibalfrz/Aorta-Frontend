@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { LayoutDashboard, Users, Shield, Key, Activity, Layers, LogOut, Settings, User, Menu } from 'lucide-vue-next'
+import { LayoutDashboard, Users, Shield, Key, Layers, LogOut, Settings, User, Menu } from 'lucide-vue-next'
 import { useAuthStore } from '@/store/auth'
 import { useTheme } from '@/composables/useTheme'
 import {
@@ -108,7 +108,7 @@ function handleNavigation(path: string) {
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent :side-offset="12" class="rounded-2xl shadow-2xl border-border/50 p-1 bg-card/95 backdrop-blur-xl text-card-foreground z-50">
-                  <DropdownMenuRadioGroup :model-value="currentTheme" @update:model-value="setTheme">
+                  <DropdownMenuRadioGroup :model-value="currentTheme" @update:model-value="(val) => setTheme(val as any)">
                     <DropdownMenuRadioItem value="light" class="rounded-lg cursor-pointer transition-colors">Terang</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="dark" class="rounded-lg cursor-pointer transition-colors">Gelap</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="theme-ocean" class="rounded-lg cursor-pointer transition-colors">Soft Ocean</DropdownMenuRadioItem>

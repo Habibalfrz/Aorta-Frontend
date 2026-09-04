@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { RouterLink } from 'vue-router'
 
+import { useRouter } from 'vue-router'
+
 const authStore = useAuthStore()
+const router = useRouter()
 
 // Gunakan native querySelector untuk menghindari bug ref di Vue 3
 onMounted(() => {
@@ -149,8 +152,9 @@ onMounted(() => {
 
           <!-- HRIS (Medium) -->
           <div
-            
-            class="reveal-item group col-span-1 md:col-span-1 lg:col-span-2 bg-muted/30 rounded-3xl border border-border/60 p-8 flex flex-col justify-between hover:bg-muted/50 transition-colors duration-500"
+            v-if="authStore.hasModuleAccess('hris')"
+            @click="router.push('/hris')"
+            class="reveal-item group col-span-1 md:col-span-1 lg:col-span-2 bg-muted/30 rounded-3xl border border-border/60 p-8 flex flex-col justify-between hover:bg-muted/50 transition-colors duration-500 cursor-pointer"
           >
             <div>
               <div class="flex justify-between items-start mb-4">
@@ -177,23 +181,16 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- System Monitor (Small) -->
+          <!-- SysAdmin -->
           <div
-            
-            class="reveal-item group col-span-1 md:col-span-1 lg:col-span-1 bg-primary text-primary-foreground rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden"
+            v-if="authStore.hasModuleAccess('sysadmin')"
+            @click="router.push('/admin-portal')"
+            class="reveal-item group col-span-1 md:col-span-1 lg:col-span-1 bg-accent text-muted-foreground rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden cursor-pointer hover:border-border hover:bg-muted transition-colors duration-500 border border-border/50"
           >
-            <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
             <div class="relative z-10">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-4 opacity-80"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-              <h3 class="font-semibold text-lg mb-1">System Health</h3>
-              <p class="text-primary-foreground/70 text-sm">Real-time metrics.</p>
-            </div>
-            <div class="relative z-10 mt-4 flex items-center gap-2">
-              <span class="relative flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-              </span>
-              <span class="text-sm font-medium">All systems operational</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-4 text-muted-foreground"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <h3 class="font-semibold text-lg mb-1 text-foreground">SysAdmin</h3>
+              <p class="text-muted-foreground text-sm">Control center.</p>
             </div>
           </div>
 

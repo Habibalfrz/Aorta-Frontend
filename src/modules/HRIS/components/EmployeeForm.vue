@@ -36,17 +36,21 @@ const form = useForm(
   z.object({
     employeeNumber: z.string().min(1, 'NIK wajib diisi'),
     fullName: z.string().min(1, 'Nama lengkap wajib diisi'),
+    email: z.string().email('Format email tidak valid').optional().or(z.literal('')),
     dateOfBirth: z.string().min(1, 'Tanggal lahir wajib diisi').refine((val) => {
       const date = new Date(val)
       return !isNaN(date.getTime()) && date < new Date()
     }, 'Tanggal lahir tidak valid atau di masa depan'),
     gender: z.enum(['L', 'P']),
+    fingerprintPin: z.string().optional(),
   }),
   {
     employeeNumber: '',
     fullName: '',
+    email: '',
     dateOfBirth: '',
     gender: 'L' as 'L' | 'P',
+    fingerprintPin: ''
   }
 )
 
@@ -57,8 +61,10 @@ const handleOpenChange = (val: boolean) => {
     form.data.value = {
       employeeNumber: '',
       fullName: '',
+      email: '',
       dateOfBirth: '',
-      gender: 'L'
+      gender: 'L',
+      fingerprintPin: ''
     }
   }
   emit('update:open', val)
@@ -72,14 +78,12 @@ const onSubmit = async () => {
     const response = await createEmployee(form.data.value)
 
     toast.success('Pegawai berhasil ditambahkan', {
-      description: `ID Pegawai: ${response.id}`,
+      description: `Akun user otomatis dibuat (Status: Non-Aktif)`,
     })
 
     emit('success', response.id)
     handleOpenChange(false)
   } catch (error: any) {
-    // 400 ValidationProblemDetails are automatically mapped to fields
-    // by useForm.ts. If it's something else, it drops to _global.
     form.setApiErrors(error)
 
     if (form.errors.value._global) {
@@ -95,11 +99,11 @@ const onSubmit = async () => {
 
 <template>
   <Dialog :open="open" @update:open="handleOpenChange">
-    <DialogContent class="sm:max-w-[425px] bg-card border-border/60 rounded-3xl p-6 shadow-2xl">
+    <DialogContent class="sm:max-w-[460px] bg-card border-border/60 rounded-3xl p-6 shadow-2xl">
       <DialogHeader>
         <DialogTitle class="text-xl font-bold tracking-tight text-foreground">Tambah Pegawai Baru</DialogTitle>
         <DialogDescription class="text-xs font-medium text-muted-foreground">
-          Masukkan data informasi dasar pegawai. Klik simpan ketika selesai.
+          Masukkan informasi data pegawai. Akun login sistem akan otomatis dibuat dalam status <strong>Non-Aktif</strong>.
         </DialogDescription>
       </DialogHeader>
 
@@ -133,29 +137,54 @@ const onSubmit = async () => {
         </div>
 
         <div class="space-y-2">
-          <Label for="dateOfBirth" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tanggal Lahir <span class="text-destructive">*</span></Label>
+          <Label for="email" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email Akun (Opsional)</Label>
           <Input
-            id="dateOfBirth"
-            type="date"
-            v-model="form.data.value.dateOfBirth"
+            id="email"
+            type="email"
+            v-model="form.data.value.email"
+            placeholder="nama@aorta.id (Default: nik@aorta.id)"
             class="bg-muted/50 border-border/50 rounded-xl"
-            :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.dateOfBirth }"
+            :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.email }"
           />
-          <p v-if="form.errors.value.dateOfBirth" class="text-xs font-bold text-destructive">{{ form.errors.value.dateOfBirth }}</p>
+          <p v-if="form.errors.value.email" class="text-xs font-bold text-destructive">{{ form.errors.value.email }}</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-2">
+            <Label for="dateOfBirth" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tanggal Lahir <span class="text-destructive">*</span></Label>
+            <Input
+              id="dateOfBirth"
+              type="date"
+              v-model="form.data.value.dateOfBirth"
+              class="bg-muted/50 border-border/50 rounded-xl"
+              :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.dateOfBirth }"
+            />
+            <p v-if="form.errors.value.dateOfBirth" class="text-xs font-bold text-destructive">{{ form.errors.value.dateOfBirth }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <Label for="gender" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Jenis Kelamin <span class="text-destructive">*</span></Label>
+            <Select v-model="form.data.value.gender">
+              <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl" :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.gender }">
+                <SelectValue placeholder="Pilih jenis kelamin" />
+              </SelectTrigger>
+              <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
+                <SelectItem value="L" class="rounded-lg cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
+                <SelectItem value="P" class="rounded-lg cursor-pointer text-xs font-medium">Perempuan</SelectItem>
+              </SelectContent>
+            </Select>
+            <p v-if="form.errors.value.gender" class="text-xs font-bold text-destructive">{{ form.errors.value.gender }}</p>
+          </div>
         </div>
 
         <div class="space-y-2">
-          <Label for="gender" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Jenis Kelamin <span class="text-destructive">*</span></Label>
-          <Select v-model="form.data.value.gender">
-            <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl" :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.gender }">
-              <SelectValue placeholder="Pilih jenis kelamin" />
-            </SelectTrigger>
-            <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
-              <SelectItem value="L" class="rounded-lg cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
-              <SelectItem value="P" class="rounded-lg cursor-pointer text-xs font-medium">Perempuan</SelectItem>
-            </SelectContent>
-          </Select>
-          <p v-if="form.errors.value.gender" class="text-xs font-bold text-destructive">{{ form.errors.value.gender }}</p>
+          <Label for="fingerprintPin" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">PIN / ID Mesin Fingerprint (Opsional)</Label>
+          <Input
+            id="fingerprintPin"
+            v-model="form.data.value.fingerprintPin"
+            placeholder="Contoh: 101 (Default: mengikuti NIK)"
+            class="bg-muted/50 border-border/50 rounded-xl font-mono"
+          />
         </div>
 
         <DialogFooter class="pt-4">

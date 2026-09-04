@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { Cpu, MemoryStick, ShieldAlert, Terminal, CheckCircle2, AlertTriangle, XCircle, Database, Server, Globe } from 'lucide-vue-next'
+import { ShieldAlert, Terminal, CheckCircle2, AlertTriangle, XCircle, Database, Server, Globe } from 'lucide-vue-next'
 import api from '@/api/axios'
 
 const isLoaded = ref(false)

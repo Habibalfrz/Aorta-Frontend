@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import api from '@/api/axios'
-import EssLayout from '@/layouts/EssLayout.vue'
 import { Clock, Calendar, BellRing, ArrowRight, Activity, FileText } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
@@ -66,20 +65,20 @@ const formatDate = () => {
 </script>
 
 <template>
-  <EssLayout>
+  <div class="h-full">
     <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div>
-        <div class="flex items-center gap-2 text-sm font-medium text-slate-500 mb-2">
+        <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
           <Calendar class="w-4 h-4" />
           <span>{{ formatDate() }}</span>
         </div>
-        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+        <h1 class="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
           Halo, {{ authStore.user?.name?.split(' ')[0] || 'User' }}
         </h1>
       </div>
 
       <div class="flex items-center gap-3">
-        <button class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200/60 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+        <button class="flex items-center gap-2 px-4 py-2 bg-card/60 backdrop-blur-xl border border-border/60 rounded-xl text-sm font-semibold text-foreground hover:bg-muted/50 hover:border-border transition-all shadow-sm">
           <FileText class="w-4 h-4" />
           Panduan ESS
         </button>
@@ -90,7 +89,7 @@ const formatDate = () => {
     <div class="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6 auto-rows-[auto]">
 
       <!-- Profil Card (Hero Widget) -->
-      <div class="md:col-span-8 lg:col-span-8 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/60 shadow-sm relative overflow-hidden group">
+      <div class="md:col-span-8 lg:col-span-8 bg-card/60 backdrop-blur-3xl rounded-[2.5rem] p-6 sm:p-8 border border-border/60 shadow-sm relative overflow-hidden group">
         <!-- Decoration -->
         <div class="absolute right-0 top-0 w-64 h-64 bg-gradient-to-bl from-primary/5 to-transparent rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
 
@@ -99,37 +98,37 @@ const formatDate = () => {
             {{ authStore.user?.name?.charAt(0).toUpperCase() || 'U' }}
           </div>
           <div class="space-y-1.5 flex-1">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider mb-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 text-[10px] font-bold uppercase tracking-wider mb-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               Status Aktif
             </div>
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ authStore.user?.name }}</h2>
-            <div class="flex items-center gap-3 text-slate-500 text-sm font-medium">
+            <h2 class="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">{{ authStore.user?.name }}</h2>
+            <div class="flex items-center gap-3 text-muted-foreground text-sm font-medium">
               <span>{{ authStore.roles[0] || 'Staff' }}</span>
-              <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-              <span class="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">ID: {{ authStore.user?.id?.substring(0, 8) || 'EMP-XXXX' }}</span>
+              <span class="w-1 h-1 rounded-full bg-border"></span>
+              <span class="font-mono text-xs bg-muted/50 px-2 py-0.5 rounded border border-border/50 text-foreground">ID: {{ authStore.user?.id?.substring(0, 8) || 'EMP-XXXX' }}</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Time & Attendance Widget -->
-      <div class="md:col-span-4 lg:col-span-4 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/60 shadow-sm flex flex-col justify-between relative overflow-hidden">
+      <div class="md:col-span-4 lg:col-span-4 bg-card/60 backdrop-blur-3xl rounded-[2.5rem] p-6 sm:p-8 border border-border/60 shadow-sm flex flex-col justify-between relative overflow-hidden">
         <div class="flex justify-between items-start mb-6">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
             <Clock class="w-5 h-5" />
           </div>
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">Live</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-md border border-border/50">Live</span>
         </div>
 
         <div>
-          <p class="text-sm font-medium text-slate-500 mb-1">Status Kehadiran</p>
+          <p class="text-sm font-medium text-muted-foreground mb-1">Status Kehadiran</p>
           <div class="flex items-center gap-2.5 mb-6">
             <span class="relative flex h-3 w-3">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" v-if="todayAttendance.checkIn && !todayAttendance.checkOut"></span>
-              <span class="relative inline-flex rounded-full h-3 w-3" :class="(todayAttendance.checkIn && !todayAttendance.checkOut) ? 'bg-emerald-500' : 'bg-slate-300'"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3" :class="(todayAttendance.checkIn && !todayAttendance.checkOut) ? 'bg-emerald-500' : 'bg-muted-foreground/30'"></span>
             </span>
-            <span class="text-base font-bold text-slate-800">
+            <span class="text-base font-bold text-foreground">
               <span v-if="todayAttendance.checkIn && todayAttendance.checkOut">Shift Selesai ({{ todayAttendance.checkOut }})</span>
               <span v-else-if="todayAttendance.checkIn">Sedang Bekerja ({{ todayAttendance.checkIn }})</span>
               <span v-else>Belum Clock In</span>
@@ -138,7 +137,7 @@ const formatDate = () => {
 
           <div class="flex gap-2">
             <button
-              class="flex-1 h-11 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              class="flex-1 h-11 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
               @click="handleClockIn"
               :disabled="isClockingIn || !!todayAttendance.checkIn"
             >
@@ -146,7 +145,7 @@ const formatDate = () => {
               <span>{{ todayAttendance.checkIn ? 'In: ' + todayAttendance.checkIn : 'Clock In' }}</span>
             </button>
             <button
-              class="flex-1 h-11 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              class="flex-1 h-11 bg-card border border-border text-foreground rounded-xl text-sm font-semibold hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
               @click="handleClockOut"
               :disabled="isClockingOut || !todayAttendance.checkIn || !!todayAttendance.checkOut"
             >
@@ -158,19 +157,19 @@ const formatDate = () => {
       </div>
 
       <!-- Quick Actions -->
-      <div class="md:col-span-4 lg:col-span-4 bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm flex flex-col justify-center">
-        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+      <div class="md:col-span-4 lg:col-span-4 bg-card/60 backdrop-blur-3xl rounded-[2.5rem] p-6 border border-border/60 shadow-sm flex flex-col justify-center">
+        <h3 class="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
           <Activity class="w-4 h-4 text-primary" />
           Aksi Cepat
         </h3>
         <div class="grid grid-cols-2 gap-3">
-          <button class="p-4 rounded-2xl bg-slate-50 hover:bg-primary/5 hover:text-primary transition-colors border border-transparent hover:border-primary/10 group text-left">
-            <Calendar class="w-5 h-5 text-slate-400 group-hover:text-primary mb-3 transition-colors" />
-            <div class="text-sm font-semibold text-slate-700 group-hover:text-primary transition-colors">Ajukan Cuti</div>
+          <button class="p-4 rounded-2xl bg-muted/30 hover:bg-primary/5 hover:text-primary transition-colors border border-border/50 hover:border-primary/20 group text-left">
+            <Calendar class="w-5 h-5 text-muted-foreground group-hover:text-primary mb-3 transition-colors" />
+            <div class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">Ajukan Cuti</div>
           </button>
-          <button class="p-4 rounded-2xl bg-slate-50 hover:bg-primary/5 hover:text-primary transition-colors border border-transparent hover:border-primary/10 group text-left">
-            <FileText class="w-5 h-5 text-slate-400 group-hover:text-primary mb-3 transition-colors" />
-            <div class="text-sm font-semibold text-slate-700 group-hover:text-primary transition-colors">Slip Gaji</div>
+          <button class="p-4 rounded-2xl bg-muted/30 hover:bg-primary/5 hover:text-primary transition-colors border border-border/50 hover:border-primary/20 group text-left">
+            <FileText class="w-5 h-5 text-muted-foreground group-hover:text-primary mb-3 transition-colors" />
+            <div class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">Slip Gaji</div>
           </button>
         </div>
       </div>
@@ -203,24 +202,24 @@ const formatDate = () => {
       </div>
 
       <!-- Announcements Widget -->
-      <div class="md:col-span-4 lg:col-span-4 bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm flex flex-col">
+      <div class="md:col-span-4 lg:col-span-4 bg-card/60 backdrop-blur-3xl rounded-[2.5rem] p-6 border border-border/60 shadow-sm flex flex-col">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+          <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
             <BellRing class="w-4 h-4 text-amber-500" />
             Papan Pengumuman
           </h3>
           <button class="text-xs font-bold text-primary hover:underline">Lihat Semua</button>
         </div>
 
-        <div class="flex-1 flex flex-col items-center justify-center p-6 bg-slate-50/50 rounded-2xl border border-slate-100 border-dashed text-center">
-          <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-            <BellRing class="w-5 h-5 text-slate-300" />
+        <div class="flex-1 flex flex-col items-center justify-center p-6 bg-muted/30 rounded-2xl border border-border/50 border-dashed text-center">
+          <div class="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+            <BellRing class="w-5 h-5 text-muted-foreground" />
           </div>
-          <p class="text-sm font-semibold text-slate-700">Belum ada informasi</p>
-          <p class="text-xs text-slate-500 mt-1 max-w-[200px]">Pengumuman penting dari tim HR akan muncul di sini.</p>
+          <p class="text-sm font-semibold text-foreground">Belum ada informasi</p>
+          <p class="text-xs text-muted-foreground mt-1 max-w-[200px]">Pengumuman penting dari tim HR akan muncul di sini.</p>
         </div>
       </div>
 
     </div>
-  </EssLayout>
+  </div>
 </template>

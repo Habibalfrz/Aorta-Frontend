@@ -100,7 +100,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'HR Dashboard',
         component: () => import('../modules/HRIS/views/HrisDashboardView.vue'),
         meta: {
-          permissions: ['hris.dashboard.read']
+          permissions: ['hris.dashboard.read', 'hris.employees.read']
         }
       },
       {
@@ -108,7 +108,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Data Pegawai',
         component: () => import('../modules/HRIS/views/EmployeeListView.vue'),
         meta: {
-          permissions: ['hris.employees.read']
+          permissions: ['hris.employees.read', 'hris.employees.write']
         }
       },
       {
@@ -116,7 +116,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Detail Pegawai',
         component: () => import('../modules/HRIS/views/EmployeeDetailView.vue'),
         meta: {
-          permissions: ['hris.employees.read']
+          permissions: ['hris.employees.read', 'hris.employees.write']
         }
       },
       {
@@ -124,7 +124,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Manajemen Shift',
         component: () => import('../modules/HRIS/views/ShiftManagementView.vue'),
         meta: {
-          permissions: ['hris.shifts.read']
+          permissions: ['hris.shifts.read', 'hris.shifts.write']
         }
       },
       {
@@ -132,7 +132,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Log Kehadiran',
         component: () => import('../modules/HRIS/views/AttendanceMonitorView.vue'),
         meta: {
-          permissions: ['hris.attendance.read']
+          permissions: ['hris.attendance.read', 'hris.attendance.write']
         }
       },
       {
@@ -140,7 +140,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Pengajuan Cuti',
         component: () => import('../modules/HRIS/views/LeaveManagementView.vue'),
         meta: {
-          permissions: ['hris.leaves.read']
+          permissions: ['hris.leaves.read', 'hris.leaves.write']
         }
       },
       {
@@ -148,7 +148,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Payroll',
         component: () => import('../modules/HRIS/views/PayrollView.vue'),
         meta: {
-          permissions: ['hris.payroll.read']
+          permissions: ['hris.payroll.read', 'hris.payroll.write', 'hris.payroll.generate']
         }
       },
       {
@@ -156,7 +156,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'HR Settings',
         component: () => import('../modules/HRIS/views/HrisSettingsView.vue'),
         meta: {
-          permissions: ['hris.settings.read']
+          permissions: ['hris.settings.read', 'hris.departments.read', 'hris.jobpositions.read', 'hris.grades.read', 'hris.employees.read']
         }
       }
     ]
@@ -199,7 +199,7 @@ router.beforeEach((to, _from) => {
   // Permission Based RBAC Checking
   if (to.meta.requiresAuth && authStore.isAuthenticated) {
     // Superadmin bypass
-    if (authStore.hasRole('Superadmin') || authStore.hasRole('superadmin')) {
+    if (authStore.hasRole('superadmin') && !authStore.isSimulating) {
       return true
     }
 

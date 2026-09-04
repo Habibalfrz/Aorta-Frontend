@@ -51,6 +51,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
   })
 
+  const hasModuleAccess = computed(() => {
+    return (modulePrefix: string): boolean => {
+      if (user.value?.is_superadmin && !user.value?.is_simulating) return true
+      return permissions.value.some(p => p.startsWith(`${modulePrefix.toLowerCase()}.`))
+    }
+  })
+
   const hasRole = computed(() => {
     return (role: string): boolean => {
       if (user.value?.is_superadmin && !user.value?.is_simulating) return true
@@ -185,9 +192,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function determineLandingRoute(): string {
+    // Superadmin (not simulating) goes directly to SysAdmin Portal
     if (hasRole.value('superadmin') && !isSimulating.value) {
       return '/admin-portal'
     }
+    // All other users land on ESS Portal (Hub/Springboard)
     return '/ess'
   }
 
@@ -207,6 +216,7 @@ export const useAuthStore = defineStore('auth', () => {
     isSimulating,
     isSuperadmin,
     hasPermission,
+    hasModuleAccess,
     hasRole,
     login,
     logout,

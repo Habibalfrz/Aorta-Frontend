@@ -274,16 +274,16 @@ const handleEmployeeCreated = (_id: string) => {
         <h1 class="text-3xl font-bold tracking-tight text-foreground">Data Pegawai</h1>
         <p class="text-sm text-muted-foreground mt-1 font-medium">Kelola profil, penempatan divisi, status, dan data induk kepegawaian.</p>
       </div>
-      <Button v-permission="'hris.employees.write'" class="h-10 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm" @click="isFormOpen = true">
+      <Button v-permission="'hris.employees.write'" class="h-10 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold rounded-sm transition-colors flex items-center gap-2 shadow-sm" @click="isFormOpen = true">
         <Plus class="w-4 h-4" />
         Tambah Pegawai Baru
       </Button>
     </div>
 
     <!-- Data Table Card -->
-    <div class="bg-card/80 backdrop-blur-xl border border-border/60 rounded-3xl shadow-sm overflow-hidden transition-all duration-700 delay-100 ease-out flex flex-col"
+    <div class="bg-card border-none rounded-sm shadow-sm overflow-hidden transition-all duration-700 delay-100 ease-out flex flex-col"
          :class="isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'">
-      
+
       <!-- Toolbar with Advanced Filtering -->
       <div class="p-6 border-b border-border/50 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-muted/20">
         <div class="flex flex-wrap items-center gap-3 flex-1">
@@ -293,17 +293,17 @@ const handleEmployeeCreated = (_id: string) => {
             <Input
               v-model="searchQuery"
               placeholder="Cari NIK atau Nama Pegawai..."
-              class="w-full pl-10 pr-4 h-11 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-foreground"
+              class="w-full pl-10 pr-4 h-11 bg-card border border-border rounded-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm text-foreground"
             />
           </div>
 
           <!-- Department Filter -->
           <div class="w-44">
             <Select v-model="selectedDepartmentFilter">
-              <SelectTrigger class="h-11 bg-card border-border/60 rounded-xl text-xs font-semibold">
+              <SelectTrigger class="h-11 bg-card border-border/60 rounded-sm text-xs font-semibold">
                 <SelectValue placeholder="Departemen" />
               </SelectTrigger>
-              <SelectContent class="rounded-xl border-border/60 bg-popover text-popover-foreground">
+              <SelectContent class="rounded-sm border-border/60 bg-popover text-popover-foreground">
                 <SelectItem value="ALL" class="text-xs">Semua Departemen</SelectItem>
                 <SelectItem v-for="dept in departments" :key="dept.id" :value="dept.name" class="text-xs">
                   {{ dept.name }}
@@ -315,10 +315,10 @@ const handleEmployeeCreated = (_id: string) => {
           <!-- Status Filter -->
           <div class="w-36">
             <Select v-model="selectedStatusFilter">
-              <SelectTrigger class="h-11 bg-card border-border/60 rounded-xl text-xs font-semibold">
+              <SelectTrigger class="h-11 bg-card border-border/60 rounded-sm text-xs font-semibold">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent class="rounded-xl border-border/60 bg-popover text-popover-foreground">
+              <SelectContent class="rounded-sm border-border/60 bg-popover text-popover-foreground">
                 <SelectItem value="ALL" class="text-xs">Semua Status</SelectItem>
                 <SelectItem value="Aktif" class="text-xs">Aktif</SelectItem>
                 <SelectItem value="Cuti" class="text-xs">Cuti</SelectItem>
@@ -396,16 +396,16 @@ const handleEmployeeCreated = (_id: string) => {
                         <MoreHorizontal class="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" class="w-48 rounded-2xl border-border/60 shadow-xl p-1.5 bg-popover text-popover-foreground">
-                      <DropdownMenuItem @click="openDetail(emp)" class="rounded-xl cursor-pointer text-xs font-semibold hover:bg-accent focus:bg-accent py-2">
+                    <DropdownMenuContent align="end" class="w-48 rounded-sm border-border/60 shadow-xl p-1.5 bg-popover text-popover-foreground">
+                      <DropdownMenuItem @click="openDetail(emp)" class="rounded-sm cursor-pointer text-xs font-semibold hover:bg-accent focus:bg-accent py-2">
                         Lihat Detail
                       </DropdownMenuItem>
                       <div v-permission="'hris.employees.write'">
                         <DropdownMenuSeparator class="my-1" />
-                        <DropdownMenuItem @click="openEditModal(emp)" class="rounded-xl cursor-pointer text-xs font-semibold hover:bg-accent focus:bg-accent py-2">
+                        <DropdownMenuItem @click="openEditModal(emp)" class="rounded-sm cursor-pointer text-xs font-semibold hover:bg-accent focus:bg-accent py-2">
                           Edit Data Pegawai
                         </DropdownMenuItem>
-                        <DropdownMenuItem @click="promptDeleteEmployee(emp)" class="rounded-xl cursor-pointer text-xs font-semibold text-destructive hover:bg-destructive/10 focus:text-destructive focus:bg-destructive/10 py-2">
+                        <DropdownMenuItem @click="promptDeleteEmployee(emp)" class="rounded-sm cursor-pointer text-xs font-semibold text-destructive hover:bg-destructive/10 focus:text-destructive focus:bg-destructive/10 py-2">
                           Hapus Pegawai
                         </DropdownMenuItem>
                       </div>
@@ -432,8 +432,8 @@ const handleEmployeeCreated = (_id: string) => {
           <SheetHeader>
             <div class="flex items-start justify-between">
               <div class="flex items-start gap-4">
-                <Avatar class="w-14 h-14 border border-border/60 shadow-sm rounded-2xl">
-                  <AvatarFallback class="bg-primary/10 text-primary text-xl font-bold rounded-2xl">
+                <Avatar class="w-14 h-14 border border-border/60 shadow-sm rounded-sm">
+                  <AvatarFallback class="bg-primary/10 text-primary text-xl font-bold rounded-sm">
                     {{ selectedEmployee?.fullName?.charAt(0) || 'U' }}
                   </AvatarFallback>
                 </Avatar>
@@ -448,7 +448,7 @@ const handleEmployeeCreated = (_id: string) => {
               <Button
                 variant="outline"
                 size="sm"
-                class="rounded-xl font-bold text-xs h-9"
+                class="rounded-sm font-bold text-xs h-9"
                 @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null"
               >
                 Halaman Penuh
@@ -482,7 +482,7 @@ const handleEmployeeCreated = (_id: string) => {
             <!-- Tab Panels -->
             <div class="p-6 flex-1 space-y-4">
               <TabsContent value="profil" class="mt-0 outline-none space-y-4">
-                <Card class="shadow-sm border-border/50 rounded-2xl bg-card">
+                <Card class="shadow-none border-none rounded-sm bg-card">
                   <CardHeader class="pb-3 border-b border-border/40">
                     <CardTitle class="text-sm font-bold text-foreground">Informasi Personal</CardTitle>
                   </CardHeader>
@@ -518,7 +518,7 @@ const handleEmployeeCreated = (_id: string) => {
               </TabsContent>
 
               <TabsContent value="penempatan" class="mt-0 outline-none">
-                <Card class="shadow-sm border-border/50 rounded-2xl bg-card">
+                <Card class="shadow-none border-none rounded-sm bg-card">
                   <CardHeader class="pb-3 border-b border-border/40">
                     <CardTitle class="text-sm font-bold text-foreground">Unit Kerja & Jabatan</CardTitle>
                   </CardHeader>
@@ -548,7 +548,7 @@ const handleEmployeeCreated = (_id: string) => {
 
     <!-- Complete Edit Employee Dialog -->
     <Dialog :open="isEditOpen" @update:open="isEditOpen = $event">
-      <DialogContent class="sm:max-w-[540px] bg-card border-border/60 rounded-3xl p-6 shadow-2xl">
+      <DialogContent class="sm:max-w-[800px] bg-card border-border p-6">
         <DialogHeader>
           <DialogTitle class="text-xl font-bold tracking-tight text-foreground">Edit Data Pegawai</DialogTitle>
           <DialogDescription class="text-xs font-medium text-muted-foreground">
@@ -563,7 +563,7 @@ const handleEmployeeCreated = (_id: string) => {
               <Input
                 id="editNik"
                 v-model="editForm.employeeNumber"
-                class="bg-muted/50 border-border/50 rounded-xl"
+                class="bg-muted border-border rounded-sm"
               />
             </div>
             <div class="space-y-2">
@@ -571,7 +571,7 @@ const handleEmployeeCreated = (_id: string) => {
               <Input
                 id="editFullName"
                 v-model="editForm.fullName"
-                class="bg-muted/50 border-border/50 rounded-xl"
+                class="bg-muted border-border rounded-sm"
               />
             </div>
           </div>
@@ -583,19 +583,19 @@ const handleEmployeeCreated = (_id: string) => {
                 id="editDateOfBirth"
                 type="date"
                 v-model="editForm.dateOfBirth"
-                class="bg-muted/50 border-border/50 rounded-xl"
+                class="bg-muted border-border rounded-sm"
               />
             </div>
 
             <div class="space-y-2">
               <Label for="editGender" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Jenis Kelamin</Label>
               <Select v-model="editForm.gender">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih jenis kelamin" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
-                  <SelectItem value="L" class="rounded-lg cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
-                  <SelectItem value="P" class="rounded-lg cursor-pointer text-xs font-medium">Perempuan</SelectItem>
+                <SelectContent class="rounded-sm border-border/60 shadow-lg bg-popover text-popover-foreground">
+                  <SelectItem value="L" class="rounded-sm cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
+                  <SelectItem value="P" class="rounded-sm cursor-pointer text-xs font-medium">Perempuan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -605,13 +605,13 @@ const handleEmployeeCreated = (_id: string) => {
             <div class="space-y-2">
               <Label for="editStatus" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Status Kepegawaian</Label>
               <Select v-model="editForm.status">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih status" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
-                  <SelectItem value="Aktif" class="rounded-lg text-xs">Aktif</SelectItem>
-                  <SelectItem value="Cuti" class="rounded-lg text-xs">Cuti</SelectItem>
-                  <SelectItem value="Resign" class="rounded-lg text-xs">Resign</SelectItem>
+                <SelectContent class="rounded-sm border-border/60 shadow-lg bg-popover text-popover-foreground">
+                  <SelectItem value="Aktif" class="rounded-sm text-xs">Aktif</SelectItem>
+                  <SelectItem value="Cuti" class="rounded-sm text-xs">Cuti</SelectItem>
+                  <SelectItem value="Resign" class="rounded-sm text-xs">Resign</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -619,15 +619,15 @@ const handleEmployeeCreated = (_id: string) => {
             <div class="space-y-2">
               <Label for="editProfession" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Kategori Profesi</Label>
               <Select v-model="editForm.professionCategory">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Kategori" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
-                  <SelectItem value="Medis" class="rounded-lg text-xs">Medis (Dokter)</SelectItem>
-                  <SelectItem value="Keperawatan" class="rounded-lg text-xs">Keperawatan / Bidan</SelectItem>
-                  <SelectItem value="Penunjang Medis" class="rounded-lg text-xs">Penunjang Medis</SelectItem>
-                  <SelectItem value="Non-Medis" class="rounded-lg text-xs">Non-Medis</SelectItem>
-                  <SelectItem value="Staff" class="rounded-lg text-xs">Staf Umum / Administrasi</SelectItem>
+                <SelectContent class="rounded-sm border-border/60 shadow-lg bg-popover text-popover-foreground">
+                  <SelectItem value="Medis" class="rounded-sm text-xs">Medis (Dokter)</SelectItem>
+                  <SelectItem value="Keperawatan" class="rounded-sm text-xs">Keperawatan / Bidan</SelectItem>
+                  <SelectItem value="Penunjang Medis" class="rounded-sm text-xs">Penunjang Medis</SelectItem>
+                  <SelectItem value="Non-Medis" class="rounded-sm text-xs">Non-Medis</SelectItem>
+                  <SelectItem value="Staff" class="rounded-sm text-xs">Staf Umum / Administrasi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -637,10 +637,10 @@ const handleEmployeeCreated = (_id: string) => {
             <div class="space-y-2">
               <Label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Departemen / Divisi</Label>
               <Select v-model="editForm.departmentId">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih Departemen" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground max-h-56">
+                <SelectContent class="rounded-sm border-border/60 shadow-lg bg-popover text-popover-foreground max-h-56">
                   <SelectItem v-for="dept in departments" :key="dept.id" :value="dept.id" class="text-xs">
                     {{ dept.name }}
                   </SelectItem>
@@ -651,10 +651,10 @@ const handleEmployeeCreated = (_id: string) => {
             <div class="space-y-2">
               <Label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Posisi Jabatan</Label>
               <Select v-model="editForm.jobPositionId">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih Jabatan" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground max-h-56">
+                <SelectContent class="rounded-sm border-border/60 shadow-lg bg-popover text-popover-foreground max-h-56">
                   <SelectItem v-for="job in jobPositions" :key="job.id" :value="job.id" class="text-xs">
                     {{ job.name }}
                   </SelectItem>
@@ -664,10 +664,10 @@ const handleEmployeeCreated = (_id: string) => {
           </div>
 
           <DialogFooter class="pt-4">
-            <Button variant="outline" type="button" @click="isEditOpen = false" :disabled="isSubmittingEdit" class="rounded-xl font-bold text-xs h-10">
+            <Button variant="outline" type="button" @click="isEditOpen = false" :disabled="isSubmittingEdit" class="rounded-sm font-bold text-xs h-10">
               Batal
             </Button>
-            <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs h-10 px-6 shadow-sm" :disabled="isSubmittingEdit">
+            <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-bold text-xs h-10 px-6 shadow-sm" :disabled="isSubmittingEdit">
               <Loader2 v-if="isSubmittingEdit" class="w-3.5 h-3.5 mr-2 animate-spin" />
               {{ isSubmittingEdit ? 'Menyimpan...' : 'Simpan Perubahan' }}
             </Button>
@@ -678,10 +678,10 @@ const handleEmployeeCreated = (_id: string) => {
 
     <!-- Premium Glassmorphic Delete Confirmation Dialog -->
     <Dialog :open="isDeleteOpen" @update:open="isDeleteOpen = $event">
-      <DialogContent class="sm:max-w-[450px] bg-card border-border/60 rounded-3xl p-6 shadow-2xl">
+      <DialogContent class="sm:max-w-[450px] bg-card border-border p-6">
         <div class="flex flex-col items-center text-center space-y-4 py-2">
           <!-- Danger Icon Banner -->
-          <div class="w-16 h-16 rounded-3xl bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive">
+          <div class="w-16 h-16 rounded-sm bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive">
             <AlertTriangle class="w-8 h-8" />
           </div>
 
@@ -693,14 +693,14 @@ const handleEmployeeCreated = (_id: string) => {
           </div>
 
           <!-- Highlight Employee Card -->
-          <div v-if="employeeToDelete" class="w-full bg-muted/40 border border-border/50 rounded-2xl p-4 text-left space-y-1">
+          <div v-if="employeeToDelete" class="w-full bg-muted/40 border-none rounded-sm p-4 text-left space-y-1">
             <p class="text-sm font-bold text-foreground">{{ employeeToDelete.fullName }}</p>
             <p class="text-xs font-mono text-muted-foreground">NIK: {{ employeeToDelete.employeeNumber }}</p>
             <p class="text-xs text-muted-foreground">{{ employeeToDelete.department || 'Umum' }} &bull; {{ employeeToDelete.position || 'Staff' }}</p>
           </div>
 
           <!-- Warning Notice -->
-          <div class="w-full bg-destructive/5 border border-destructive/20 rounded-2xl p-3 flex items-start gap-2.5 text-left">
+          <div class="w-full bg-destructive/5 border border-destructive/20 rounded-sm p-3 flex items-start gap-2.5 text-left">
             <ShieldAlert class="w-4 h-4 text-destructive shrink-0 mt-0.5" />
             <p class="text-[11px] text-destructive leading-relaxed font-medium">
               Tindakan ini akan menonaktifkan data pegawai (<em>Soft-Delete</em>) dan <strong>secara otomatis menonaktifkan akun login</strong> terkait agar tidak dapat mengakses sistem lagi.
@@ -709,10 +709,10 @@ const handleEmployeeCreated = (_id: string) => {
         </div>
 
         <DialogFooter class="flex sm:justify-between gap-2 pt-2">
-          <Button variant="outline" type="button" @click="isDeleteOpen = false" :disabled="isDeleting" class="rounded-xl font-bold text-xs h-10 w-full sm:w-auto">
+          <Button variant="outline" type="button" @click="isDeleteOpen = false" :disabled="isDeleting" class="rounded-sm font-bold text-xs h-10 w-full sm:w-auto">
             Batal
           </Button>
-          <Button variant="destructive" type="button" @click="confirmDeleteEmployee" :disabled="isDeleting" class="bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs h-10 px-6 w-full sm:w-auto shadow-sm">
+          <Button variant="destructive" type="button" @click="confirmDeleteEmployee" :disabled="isDeleting" class="bg-destructive hover:bg-destructive/90 rounded-sm font-bold text-xs h-10 px-6 w-full sm:w-auto shadow-sm">
             <Loader2 v-if="isDeleting" class="w-3.5 h-3.5 mr-2 animate-spin" />
             {{ isDeleting ? 'Menghapus...' : 'Ya, Hapus Pegawai' }}
           </Button>

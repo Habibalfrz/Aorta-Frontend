@@ -32,7 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Search, Plus, MoreHorizontal, UserSquare, AlertTriangle, Building2, ShieldAlert, Loader2, CalendarDays, CalendarOff, Clock } from 'lucide-vue-next'
+import { Search, Plus, MoreHorizontal, UserSquare, AlertTriangle, Building2, ShieldAlert, Loader2, CalendarDays, CalendarOff, Clock, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -256,6 +256,74 @@ onMounted(() => {
 const handleEmployeeCreated = (_id: string) => {
   fetchEmployees()
 }
+
+// Dialog Navigation Logic
+const currentIndex = computed(() => {
+  if (!selectedEmployee.value) return -1
+  return filteredEmployees.value.findIndex(emp => emp.id === selectedEmployee.value?.id)
+})
+
+const hasNextEmployee = computed(() => currentIndex.value >= 0 && currentIndex.value < filteredEmployees.value.length - 1)
+const hasPrevEmployee = computed(() => currentIndex.value > 0)
+
+const goNextEmployee = () => {
+  if (hasNextEmployee.value) {
+    selectedEmployee.value = filteredEmployees.value[currentIndex.value + 1]
+  }
+}
+
+const goPrevEmployee = () => {
+  if (hasPrevEmployee.value) {
+    selectedEmployee.value = filteredEmployees.value[currentIndex.value - 1]
+  }
+}
+
+// Mockup Data for Attendance Timeline (assuming 07:00 - 19:00 window)
+// 07:00 = 0%, 19:00 = 100% (12 hours total)
+// 08:00 = 8.33%, 12:00 = 41.66%, 13:00 = 50%, 17:00 = 83.33%
+const attendancePeriod = ref('1w')
+const mockupAttendance = ref([
+  {
+    date: '2026-09-22',
+    dateStr: 'Senin, 22 Sep',
+    totalHours: '8j 00m',
+    status: 'Tepat Waktu',
+    segments: [
+      { start: '08:00', end: '12:00', left: '8.33%', width: '33.33%', color: 'bg-emerald-500' },
+      { start: '13:00', end: '17:00', left: '50%', width: '33.33%', color: 'bg-emerald-500' }
+    ]
+  },
+  {
+    date: '2026-09-21',
+    dateStr: 'Jumat, 19 Sep',
+    totalHours: '8j 30m',
+    status: 'Tepat Waktu',
+    segments: [
+      { start: '07:45', end: '12:00', left: '6.25%', width: '35.41%', color: 'bg-emerald-500' },
+      { start: '13:00', end: '17:15', left: '50%', width: '35.41%', color: 'bg-emerald-500' }
+    ]
+  },
+  {
+    date: '2026-09-20',
+    dateStr: 'Kamis, 18 Sep',
+    totalHours: '7j 30m',
+    status: 'Terlambat',
+    segments: [
+      { start: '08:30', end: '12:00', left: '12.5%', width: '29.16%', color: 'bg-amber-500' },
+      { start: '13:00', end: '17:00', left: '50%', width: '33.33%', color: 'bg-emerald-500' }
+    ]
+  },
+  {
+    date: '2026-09-19',
+    dateStr: 'Rabu, 17 Sep',
+    totalHours: '8j 15m',
+    status: 'Tepat Waktu',
+    segments: [
+      { start: '07:50', end: '12:00', left: '6.94%', width: '34.72%', color: 'bg-emerald-500' },
+      { start: '13:00', end: '17:05', left: '50%', width: '34.02%', color: 'bg-emerald-500' }
+    ]
+  }
+])
 </script>
 
 <template>
@@ -438,13 +506,23 @@ const handleEmployeeCreated = (_id: string) => {
                   </DialogDescription>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                class="rounded-sm font-bold text-[10px] h-7 px-3 shrink-0"
-                @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null"
-              >
-                Halaman Penuh
-              </Button>
+              <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center gap-1 bg-muted/30 border border-border/50 rounded-sm p-0.5">
+                  <Button variant="ghost" size="icon" class="h-7 w-7 rounded-[2px]" :disabled="!hasPrevEmployee" @click="goPrevEmployee">
+                    <ChevronLeft class="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" class="h-7 w-7 rounded-[2px]" :disabled="!hasNextEmployee" @click="goNextEmployee">
+                    <ChevronRight class="w-4 h-4" />
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  class="rounded-sm font-bold text-[10px] h-8 px-3 shrink-0"
+                  @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null"
+                >
+                  Halaman Penuh
+                </Button>
+              </div>
             </div>
           </DialogHeader>
         </div>
@@ -551,26 +629,51 @@ const handleEmployeeCreated = (_id: string) => {
               <TabsContent value="kehadiran" class="mt-0 outline-none space-y-4">
                 <Card class="shadow-none border border-border/40 rounded-sm bg-card">
                   <CardHeader class="pb-3 border-b border-border/40 flex flex-row items-center justify-between">
-                    <CardTitle class="text-sm font-bold text-foreground">Ringkasan Kehadiran Bulan Ini</CardTitle>
-                    <Badge variant="outline" class="text-[10px] font-mono">Oktober 2026</Badge>
+                    <CardTitle class="text-sm font-bold text-foreground">Aktivitas Kehadiran Harian</CardTitle>
+                    <Select v-model="attendancePeriod">
+                      <SelectTrigger class="w-[140px] h-8 text-[11px] font-semibold rounded-sm border-border/60 bg-muted/20">
+                        <SelectValue placeholder="Pilih Periode" />
+                      </SelectTrigger>
+                      <SelectContent class="rounded-sm border-border/60 text-xs">
+                        <SelectItem value="1w">Seminggu Terakhir</SelectItem>
+                        <SelectItem value="2w">2 Minggu Terakhir</SelectItem>
+                        <SelectItem value="3w">3 Minggu Terakhir</SelectItem>
+                        <SelectItem value="4w">4 Minggu Terakhir</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </CardHeader>
-                  <CardContent class="pt-4">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div class="p-3 bg-green-500/10 border border-green-500/20 rounded-sm text-center">
-                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">20</div>
-                        <div class="text-[10px] font-semibold text-muted-foreground uppercase mt-1">Hadir (Tepat Waktu)</div>
-                      </div>
-                      <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-sm text-center">
-                        <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">2</div>
-                        <div class="text-[10px] font-semibold text-muted-foreground uppercase mt-1">Terlambat</div>
-                      </div>
-                      <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-sm text-center">
-                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">1</div>
-                        <div class="text-[10px] font-semibold text-muted-foreground uppercase mt-1">Absen / Alpha</div>
-                      </div>
-                      <div class="p-3 bg-blue-500/10 border border-blue-500/20 rounded-sm text-center">
-                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">92%</div>
-                        <div class="text-[10px] font-semibold text-muted-foreground uppercase mt-1">Tingkat Kehadiran</div>
+                  <CardContent class="pt-4 space-y-6">
+                    <!-- Daily Timeline List -->
+                    <div class="space-y-5">
+                      <div v-for="(day, idx) in mockupAttendance" :key="idx" class="space-y-1.5">
+                        <div class="flex items-center justify-between text-xs">
+                          <span class="font-bold text-foreground">{{ day.dateStr }}</span>
+                          <div class="flex items-center gap-3">
+                            <span class="font-semibold" :class="day.status === 'Terlambat' ? 'text-amber-500' : 'text-emerald-500'">{{ day.status }}</span>
+                            <span class="font-mono text-muted-foreground">{{ day.totalHours }}</span>
+                          </div>
+                        </div>
+
+                        <!-- Timeline Bar (07:00 - 19:00) -->
+                        <div class="relative w-full h-3.5 bg-muted/40 rounded-sm overflow-hidden border border-border/30">
+                          <div
+                            v-for="(seg, sIdx) in day.segments"
+                            :key="sIdx"
+                            class="absolute top-0 bottom-0 rounded-[1px] opacity-90 hover:opacity-100 transition-opacity"
+                            :class="seg.color"
+                            :style="{ left: seg.left, width: seg.width }"
+                            :title="`${seg.start} - ${seg.end}`"
+                          ></div>
+                        </div>
+
+                        <!-- Time Axis Labels -->
+                        <div class="flex justify-between text-[9px] font-mono text-muted-foreground px-1">
+                          <span>07:00</span>
+                          <span>10:00</span>
+                          <span>13:00</span>
+                          <span>16:00</span>
+                          <span>19:00</span>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

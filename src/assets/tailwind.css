@@ -13,6 +13,7 @@
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
+  --radius: var(--radius);
 
   --animate-smooth-appear: smooth-appear 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   @keyframes smooth-appear {
@@ -39,6 +40,7 @@
     --primary-foreground: 210 40% 98%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
+    --radius: 0.3rem;
   }
 
   .dark {
@@ -52,6 +54,7 @@
     --primary-foreground: 222.2 47.4% 1.2%;
     --muted: 223 47% 11%;
     --muted-foreground: 215.4 16.3% 56.9%;
+    --radius: 0.3rem;
   }
 
   .theme-ocean {
@@ -65,6 +68,7 @@
     --primary-foreground: 210 40% 98%;
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
+    --radius: 0.3rem;
   }
 
   body {

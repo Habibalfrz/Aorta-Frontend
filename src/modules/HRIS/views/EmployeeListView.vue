@@ -32,7 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Search, Plus, MoreHorizontal, UserSquare, AlertTriangle, Building2, ShieldAlert, Loader2 } from 'lucide-vue-next'
+import { Search, Plus, MoreHorizontal, UserSquare, AlertTriangle, Building2, ShieldAlert, Loader2, CalendarDays, CalendarOff, Clock } from 'lucide-vue-next'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -419,7 +419,7 @@ const handleEmployeeCreated = (_id: string) => {
 
     <!-- Dialog for Employee Detail -->
     <Dialog v-model:open="isDetailOpen">
-      <DialogContent class="sm:max-w-4xl w-[90vw] p-0 flex flex-col max-h-[85vh] bg-card border-border overflow-hidden">
+      <DialogContent class="sm:max-w-4xl w-[90vw] p-0 flex flex-col h-[85vh] bg-card border-border overflow-hidden">
         <!-- Header -->
         <div class="p-6 bg-card border-b border-border/50 shrink-0">
           <DialogHeader>
@@ -440,8 +440,7 @@ const handleEmployeeCreated = (_id: string) => {
               </div>
               <Button
                 variant="outline"
-                size="sm"
-                class="rounded-sm font-bold text-xs h-9 shrink-0"
+                class="rounded-sm font-bold text-[10px] h-7 px-3 shrink-0"
                 @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null"
               >
                 Halaman Penuh
@@ -454,20 +453,41 @@ const handleEmployeeCreated = (_id: string) => {
         <div class="flex-1 overflow-y-auto custom-scrollbar">
           <Tabs defaultValue="profil" class="w-full flex flex-col h-full">
             <div class="px-6 pt-3 bg-card border-b border-border/50 sticky top-0 z-10">
-              <TabsList class="w-full justify-start h-auto p-0 bg-transparent gap-6">
+              <TabsList class="w-full justify-start h-auto p-0 bg-transparent gap-6 overflow-x-auto flex-nowrap">
                 <TabsTrigger
                   value="profil"
-                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
                 >
                   <UserSquare class="w-4 h-4 mr-2" />
                   Profil
                 </TabsTrigger>
                 <TabsTrigger
                   value="penempatan"
-                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
                 >
                   <Building2 class="w-4 h-4 mr-2" />
                   Penempatan
+                </TabsTrigger>
+                <TabsTrigger
+                  value="kehadiran"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
+                >
+                  <CalendarDays class="w-4 h-4 mr-2" />
+                  Kehadiran
+                </TabsTrigger>
+                <TabsTrigger
+                  value="cuti"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
+                >
+                  <CalendarOff class="w-4 h-4 mr-2" />
+                  Cuti & Izin
+                </TabsTrigger>
+                <TabsTrigger
+                  value="lembur"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
+                >
+                  <Clock class="w-4 h-4 mr-2" />
+                  Lembur
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -523,6 +543,79 @@ const handleEmployeeCreated = (_id: string) => {
                     <div class="flex items-center justify-between py-1">
                       <span class="text-muted-foreground font-semibold">Jabatan:</span>
                       <span class="font-bold text-foreground">{{ selectedEmployee?.position || 'Belum diatur' }}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="kehadiran" class="mt-0 outline-none space-y-4">
+                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
+                  <CardHeader class="pb-3 border-b border-border/40 flex flex-row items-center justify-between">
+                    <CardTitle class="text-sm font-bold text-foreground">Ringkasan Kehadiran Bulan Ini</CardTitle>
+                    <Badge variant="outline" class="text-[10px] font-mono">Oktober 2026</Badge>
+                  </CardHeader>
+                  <CardContent class="pt-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div class="p-3 bg-green-500/10 border border-green-500/20 rounded-sm text-center">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">20</div>
+                        <div class="text-[10px] font-semibold text-muted-foreground uppercase mt-1">Hadir (Tepat Waktu)</div>
+                      </div>
+                      <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-sm text-center">
+                        <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">2</div>
+                        <div class="text-[10px] font-semibold text-muted-foreground uppercase mt-1">Terlambat</div>
+                      </div>
+                      <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-sm text-center">
+                        <div class="text-2xl font-bold text-red-600 dark:text-red-400">1</div>
+                        <div class="text-[10px] font-semibold text-muted-foreground uppercase mt-1">Absen / Alpha</div>
+                      </div>
+                      <div class="p-3 bg-blue-500/10 border border-blue-500/20 rounded-sm text-center">
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">92%</div>
+                        <div class="text-[10px] font-semibold text-muted-foreground uppercase mt-1">Tingkat Kehadiran</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="cuti" class="mt-0 outline-none space-y-4">
+                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
+                  <CardHeader class="pb-3 border-b border-border/40">
+                    <CardTitle class="text-sm font-bold text-foreground">Sisa Kuota Cuti Tahunan</CardTitle>
+                  </CardHeader>
+                  <CardContent class="pt-4">
+                    <div class="flex items-center justify-between p-4 bg-muted/30 border border-border/50 rounded-sm">
+                      <div class="space-y-1">
+                        <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Sisa Cuti {{ new Date().getFullYear() }}</p>
+                        <p class="text-sm font-medium text-foreground">Dapat digunakan hingga 31 Desember</p>
+                      </div>
+                      <div class="text-3xl font-bold text-primary">
+                        8 <span class="text-sm font-medium text-muted-foreground">hari</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <div class="text-center p-6 border border-dashed border-border/60 rounded-sm bg-muted/10">
+                  <CalendarOff class="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+                  <p class="text-sm font-semibold text-foreground">Belum ada riwayat cuti terbaru</p>
+                  <p class="text-xs text-muted-foreground">Pegawai ini belum mengajukan cuti dalam 3 bulan terakhir.</p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="lembur" class="mt-0 outline-none space-y-4">
+                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
+                  <CardHeader class="pb-3 border-b border-border/40 flex flex-row items-center justify-between">
+                    <CardTitle class="text-sm font-bold text-foreground">Akumulasi Lembur</CardTitle>
+                    <Badge variant="outline" class="text-[10px] font-mono">Bulan Ini</Badge>
+                  </CardHeader>
+                  <CardContent class="pt-4">
+                    <div class="flex items-center gap-4">
+                      <div class="w-16 h-16 rounded-full border-4 border-primary/20 flex items-center justify-center">
+                        <span class="text-xl font-bold text-primary">12</span>
+                      </div>
+                      <div>
+                        <p class="text-sm font-bold text-foreground">Total Jam Lembur</p>
+                        <p class="text-xs text-muted-foreground mt-0.5">Disetujui dari 3 pengajuan lembur</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

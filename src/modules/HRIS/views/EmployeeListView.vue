@@ -31,13 +31,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Search, Plus, MoreHorizontal, UserSquare, AlertTriangle, Building2, ShieldAlert, Loader2 } from 'lucide-vue-next'
 import {
@@ -424,37 +417,37 @@ const handleEmployeeCreated = (_id: string) => {
       </div>
     </div>
 
-    <!-- Quick Drawer for Employee Detail -->
-    <Sheet v-model:open="isDetailOpen">
-      <SheetContent class="sm:max-w-xl w-[90vw] p-0 flex flex-col h-full bg-card border-l border-border/60">
+    <!-- Dialog for Employee Detail -->
+    <Dialog v-model:open="isDetailOpen">
+      <DialogContent class="sm:max-w-4xl w-[90vw] p-0 flex flex-col max-h-[85vh] bg-card border-border overflow-hidden">
         <!-- Header -->
-        <div class="p-6 bg-card border-b border-border/50">
-          <SheetHeader>
-            <div class="flex items-start justify-between">
+        <div class="p-6 bg-card border-b border-border/50 shrink-0">
+          <DialogHeader>
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div class="flex items-start gap-4">
                 <Avatar class="w-14 h-14 border border-border/60 shadow-sm rounded-sm">
                   <AvatarFallback class="bg-primary/10 text-primary text-xl font-bold rounded-sm">
                     {{ selectedEmployee?.fullName?.charAt(0) || 'U' }}
                   </AvatarFallback>
                 </Avatar>
-                <div class="pt-0.5">
-                  <SheetTitle class="text-xl font-bold text-foreground">{{ selectedEmployee?.fullName }}</SheetTitle>
-                  <SheetDescription class="text-xs mt-1 flex flex-col gap-0.5 font-medium text-muted-foreground">
+                <div class="pt-0.5 text-left">
+                  <DialogTitle class="text-xl font-bold text-foreground">{{ selectedEmployee?.fullName }}</DialogTitle>
+                  <DialogDescription class="text-xs mt-1 flex flex-col gap-0.5 font-medium text-muted-foreground">
                     <span class="font-mono text-foreground font-semibold">NIK: {{ selectedEmployee?.employeeNumber }}</span>
                     <span>{{ selectedEmployee?.position || 'Posisi belum diatur' }} &bull; {{ selectedEmployee?.department || 'Departemen belum diatur' }}</span>
-                  </SheetDescription>
+                  </DialogDescription>
                 </div>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                class="rounded-sm font-bold text-xs h-9"
+                class="rounded-sm font-bold text-xs h-9 shrink-0"
                 @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null"
               >
                 Halaman Penuh
               </Button>
             </div>
-          </SheetHeader>
+          </DialogHeader>
         </div>
 
         <!-- Scrollable Tabs Content -->
@@ -482,7 +475,7 @@ const handleEmployeeCreated = (_id: string) => {
             <!-- Tab Panels -->
             <div class="p-6 flex-1 space-y-4">
               <TabsContent value="profil" class="mt-0 outline-none space-y-4">
-                <Card class="shadow-none border-none rounded-sm bg-card">
+                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
                   <CardHeader class="pb-3 border-b border-border/40">
                     <CardTitle class="text-sm font-bold text-foreground">Informasi Personal</CardTitle>
                   </CardHeader>
@@ -518,7 +511,7 @@ const handleEmployeeCreated = (_id: string) => {
               </TabsContent>
 
               <TabsContent value="penempatan" class="mt-0 outline-none">
-                <Card class="shadow-none border-none rounded-sm bg-card">
+                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
                   <CardHeader class="pb-3 border-b border-border/40">
                     <CardTitle class="text-sm font-bold text-foreground">Unit Kerja & Jabatan</CardTitle>
                   </CardHeader>
@@ -537,8 +530,8 @@ const handleEmployeeCreated = (_id: string) => {
             </div>
           </Tabs>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
 
     <!-- Create Employee Dialog -->
     <EmployeeForm

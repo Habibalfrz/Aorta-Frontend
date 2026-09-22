@@ -32,7 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Search, Plus, MoreHorizontal, UserSquare, AlertTriangle, Building2, ShieldAlert, Loader2, CalendarDays, CalendarOff, Clock, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { Search, Plus, MoreHorizontal, UserSquare, AlertTriangle, Building2, ShieldAlert, Loader2, CalendarDays, CalendarOff, Clock, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-vue-next'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -487,245 +487,235 @@ const mockupAttendance = ref([
 
     <!-- Dialog for Employee Detail -->
     <Dialog v-model:open="isDetailOpen">
-      <DialogContent class="sm:max-w-4xl w-[90vw] p-0 flex flex-col h-[85vh] bg-card border-border overflow-hidden">
-        <!-- Header -->
-        <div class="p-6 bg-card border-b border-border/50 shrink-0">
-          <DialogHeader>
-            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-              <div class="flex items-start gap-4">
-                <Avatar class="w-14 h-14 border border-border/60 shadow-sm rounded-sm">
-                  <AvatarFallback class="bg-primary/10 text-primary text-xl font-bold rounded-sm">
-                    {{ selectedEmployee?.fullName?.charAt(0) || 'U' }}
-                  </AvatarFallback>
-                </Avatar>
-                <div class="pt-0.5 text-left">
-                  <DialogTitle class="text-xl font-bold text-foreground">{{ selectedEmployee?.fullName }}</DialogTitle>
-                  <DialogDescription class="text-xs mt-1 flex flex-col gap-0.5 font-medium text-muted-foreground">
-                    <span class="font-mono text-foreground font-semibold">NIK: {{ selectedEmployee?.employeeNumber }}</span>
-                    <span>{{ selectedEmployee?.position || 'Posisi belum diatur' }} &bull; {{ selectedEmployee?.department || 'Departemen belum diatur' }}</span>
-                  </DialogDescription>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 shrink-0">
-                <div class="flex items-center gap-1 bg-muted/30 border border-border/50 rounded-sm p-0.5">
-                  <Button variant="ghost" size="icon" class="h-7 w-7 rounded-[2px]" :disabled="!hasPrevEmployee" @click="goPrevEmployee">
-                    <ChevronLeft class="w-4 h-4" />
+      <DialogContent class="sm:max-w-5xl w-[95vw] p-0 h-[85vh] bg-card border-border overflow-hidden rounded-sm flex flex-col">
+        <Tabs defaultValue="profil" class="w-full h-full flex flex-col sm:flex-row">
+
+          <!-- Left Sidebar: Profile & Nav -->
+          <div class="w-full sm:w-[280px] md:w-[320px] bg-muted/10 border-b sm:border-b-0 sm:border-r border-border/50 shrink-0 flex flex-col h-full z-10">
+            <!-- Profile Area -->
+            <div class="p-6 pb-5 border-b border-border/40">
+              <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-1 bg-background border border-border/60 rounded-sm p-0.5 shadow-sm">
+                  <Button variant="ghost" size="icon" class="h-6 w-6 rounded-[2px]" :disabled="!hasPrevEmployee" @click="goPrevEmployee">
+                    <ChevronLeft class="w-3.5 h-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" class="h-7 w-7 rounded-[2px]" :disabled="!hasNextEmployee" @click="goNextEmployee">
-                    <ChevronRight class="w-4 h-4" />
+                  <Button variant="ghost" size="icon" class="h-6 w-6 rounded-[2px]" :disabled="!hasNextEmployee" @click="goNextEmployee">
+                    <ChevronRight class="w-3.5 h-3.5" />
                   </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  class="rounded-sm font-bold text-[10px] h-8 px-3 shrink-0"
-                  @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null"
-                >
-                  Halaman Penuh
+                <Button variant="ghost" size="icon" class="h-7 w-7 rounded-sm text-muted-foreground hover:text-foreground" title="Buka Halaman Penuh" @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null">
+                  <ExternalLink class="w-3.5 h-3.5" />
                 </Button>
               </div>
-            </div>
-          </DialogHeader>
-        </div>
 
-        <!-- Scrollable Tabs Content -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar">
-          <Tabs defaultValue="profil" class="w-full flex flex-col h-full">
-            <div class="px-6 pt-3 bg-card border-b border-border/50 sticky top-0 z-10">
-              <TabsList class="w-full justify-start h-auto p-0 bg-transparent gap-6 overflow-x-auto flex-nowrap">
+              <Avatar class="w-16 h-16 mb-4 border border-border shadow-sm rounded-sm">
+                <AvatarFallback class="bg-primary/10 text-primary text-xl font-bold rounded-sm">
+                  {{ selectedEmployee?.fullName?.charAt(0) || 'U' }}
+                </AvatarFallback>
+              </Avatar>
+              <h2 class="text-lg font-bold text-foreground leading-tight">{{ selectedEmployee?.fullName }}</h2>
+              <p class="text-[11px] font-mono font-medium text-muted-foreground mt-1">NIK: {{ selectedEmployee?.employeeNumber }}</p>
+
+              <div class="mt-4 flex flex-wrap gap-2 items-center">
+                <Badge :variant="getStatusVariant(selectedEmployee?.status || 'Aktif')" class="text-[9px] font-bold uppercase px-1.5 py-0">
+                  {{ selectedEmployee?.status || 'Aktif' }}
+                </Badge>
+                <span class="text-[10px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-sm uppercase tracking-wider border border-border/50">
+                  {{ selectedEmployee?.department || 'Umum' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Navigation Menu (Tabs) -->
+            <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-2">Menu Pegawai</p>
+              <TabsList class="flex flex-col h-auto bg-transparent p-0 gap-1 w-full items-start">
                 <TabsTrigger
                   value="profil"
-                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
+                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
                 >
-                  <UserSquare class="w-4 h-4 mr-2" />
-                  Profil
+                  <UserSquare class="w-4 h-4 mr-3" /> Profil Personal
                 </TabsTrigger>
                 <TabsTrigger
                   value="penempatan"
-                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
+                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
                 >
-                  <Building2 class="w-4 h-4 mr-2" />
-                  Penempatan
+                  <Building2 class="w-4 h-4 mr-3" /> Unit Kerja & Jabatan
                 </TabsTrigger>
                 <TabsTrigger
                   value="kehadiran"
-                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
+                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
                 >
-                  <CalendarDays class="w-4 h-4 mr-2" />
-                  Kehadiran
+                  <CalendarDays class="w-4 h-4 mr-3" /> Kehadiran
                 </TabsTrigger>
                 <TabsTrigger
                   value="cuti"
-                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
+                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
                 >
-                  <CalendarOff class="w-4 h-4 mr-2" />
-                  Cuti & Izin
+                  <CalendarOff class="w-4 h-4 mr-3" /> Cuti & Izin
                 </TabsTrigger>
                 <TabsTrigger
                   value="lembur"
-                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-xs font-bold whitespace-nowrap"
+                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
                 >
-                  <Clock class="w-4 h-4 mr-2" />
-                  Lembur
+                  <Clock class="w-4 h-4 mr-3" /> Lembur
                 </TabsTrigger>
               </TabsList>
             </div>
+          </div>
 
-            <!-- Tab Panels -->
-            <div class="p-6 flex-1 space-y-4">
-              <TabsContent value="profil" class="mt-0 outline-none space-y-4">
-                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
-                  <CardHeader class="pb-3 border-b border-border/40">
-                    <CardTitle class="text-sm font-bold text-foreground">Informasi Personal</CardTitle>
-                  </CardHeader>
-                  <CardContent class="pt-4 space-y-3">
-                    <div class="grid grid-cols-3 gap-2 py-1 border-b border-border/30 text-xs">
-                      <div class="text-muted-foreground font-semibold">Status Pegawai</div>
-                      <div class="col-span-2">
-                        <Badge :variant="getStatusVariant(selectedEmployee?.status || 'Aktif')" class="text-[10px] font-bold uppercase">
-                          {{ selectedEmployee?.status || 'Aktif' }}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 py-1 border-b border-border/30 text-xs">
-                      <div class="text-muted-foreground font-semibold">Jenis Kelamin</div>
-                      <div class="col-span-2 font-medium text-foreground">
-                        {{ selectedEmployee?.gender === 'L' ? 'Laki-laki' : (selectedEmployee?.gender === 'P' ? 'Perempuan' : selectedEmployee?.gender) }}
-                      </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 py-1 border-b border-border/30 text-xs">
-                      <div class="text-muted-foreground font-semibold">Tanggal Lahir</div>
-                      <div class="col-span-2 font-medium text-foreground">
-                        {{ selectedEmployee?.dateOfBirth ? new Date(selectedEmployee.dateOfBirth).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}
-                      </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 py-1 text-xs">
-                      <div class="text-muted-foreground font-semibold">Kategori Profesi</div>
-                      <div class="col-span-2 font-medium text-foreground">
-                        {{ selectedEmployee?.professionCategory || 'Staff' }}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+          <!-- Right Content Area -->
+          <div class="flex-1 bg-background overflow-y-auto custom-scrollbar relative">
+            <div class="p-8 sm:p-10 max-w-3xl mx-auto space-y-8">
+              <TabsContent value="profil" class="mt-0 outline-none space-y-8 animate-in fade-in-50 duration-500">
+                <div class="pb-4 border-b border-border/40">
+                  <h3 class="text-xl font-bold text-foreground tracking-tight">Informasi Personal</h3>
+                  <p class="text-sm text-muted-foreground mt-1">Biodata demografi dan kontak darurat pegawai.</p>
+                </div>
 
-              <TabsContent value="penempatan" class="mt-0 outline-none">
-                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
-                  <CardHeader class="pb-3 border-b border-border/40">
-                    <CardTitle class="text-sm font-bold text-foreground">Unit Kerja & Jabatan</CardTitle>
-                  </CardHeader>
-                  <CardContent class="pt-4 space-y-3 text-xs">
-                    <div class="flex items-center justify-between py-1 border-b border-border/30">
-                      <span class="text-muted-foreground font-semibold">Departemen:</span>
-                      <span class="font-bold text-foreground">{{ selectedEmployee?.department || 'Belum diatur' }}</span>
-                    </div>
-                    <div class="flex items-center justify-between py-1">
-                      <span class="text-muted-foreground font-semibold">Jabatan:</span>
-                      <span class="font-bold text-foreground">{{ selectedEmployee?.position || 'Belum diatur' }}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="kehadiran" class="mt-0 outline-none space-y-4">
-                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
-                  <CardHeader class="pb-3 border-b border-border/40 flex flex-row items-center justify-between">
-                    <CardTitle class="text-sm font-bold text-foreground">Aktivitas Kehadiran Harian</CardTitle>
-                    <Select v-model="attendancePeriod">
-                      <SelectTrigger class="w-[140px] h-8 text-[11px] font-semibold rounded-sm border-border/60 bg-muted/20">
-                        <SelectValue placeholder="Pilih Periode" />
-                      </SelectTrigger>
-                      <SelectContent class="rounded-sm border-border/60 text-xs">
-                        <SelectItem value="1w">Seminggu Terakhir</SelectItem>
-                        <SelectItem value="2w">2 Minggu Terakhir</SelectItem>
-                        <SelectItem value="3w">3 Minggu Terakhir</SelectItem>
-                        <SelectItem value="4w">4 Minggu Terakhir</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </CardHeader>
-                  <CardContent class="pt-4 space-y-6">
-                    <!-- Daily Timeline List -->
-                    <div class="space-y-5">
-                      <div v-for="(day, idx) in mockupAttendance" :key="idx" class="space-y-1.5">
-                        <div class="flex items-center justify-between text-xs">
-                          <span class="font-bold text-foreground">{{ day.dateStr }}</span>
-                          <div class="flex items-center gap-3">
-                            <span class="font-semibold" :class="day.status === 'Terlambat' ? 'text-amber-500' : 'text-emerald-500'">{{ day.status }}</span>
-                            <span class="font-mono text-muted-foreground">{{ day.totalHours }}</span>
-                          </div>
-                        </div>
-
-                        <!-- Timeline Bar (07:00 - 19:00) -->
-                        <div class="relative w-full h-3.5 bg-muted/40 rounded-sm overflow-hidden border border-border/30">
-                          <div
-                            v-for="(seg, sIdx) in day.segments"
-                            :key="sIdx"
-                            class="absolute top-0 bottom-0 rounded-[1px] opacity-90 hover:opacity-100 transition-opacity"
-                            :class="seg.color"
-                            :style="{ left: seg.left, width: seg.width }"
-                            :title="`${seg.start} - ${seg.end}`"
-                          ></div>
-                        </div>
-
-                        <!-- Time Axis Labels -->
-                        <div class="flex justify-between text-[9px] font-mono text-muted-foreground px-1">
-                          <span>07:00</span>
-                          <span>10:00</span>
-                          <span>13:00</span>
-                          <span>16:00</span>
-                          <span>19:00</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="cuti" class="mt-0 outline-none space-y-4">
-                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
-                  <CardHeader class="pb-3 border-b border-border/40">
-                    <CardTitle class="text-sm font-bold text-foreground">Sisa Kuota Cuti Tahunan</CardTitle>
-                  </CardHeader>
-                  <CardContent class="pt-4">
-                    <div class="flex items-center justify-between p-4 bg-muted/30 border border-border/50 rounded-sm">
-                      <div class="space-y-1">
-                        <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Sisa Cuti {{ new Date().getFullYear() }}</p>
-                        <p class="text-sm font-medium text-foreground">Dapat digunakan hingga 31 Desember</p>
-                      </div>
-                      <div class="text-3xl font-bold text-primary">
-                        8 <span class="text-sm font-medium text-muted-foreground">hari</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <div class="text-center p-6 border border-dashed border-border/60 rounded-sm bg-muted/10">
-                  <CalendarOff class="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-                  <p class="text-sm font-semibold text-foreground">Belum ada riwayat cuti terbaru</p>
-                  <p class="text-xs text-muted-foreground">Pegawai ini belum mengajukan cuti dalam 3 bulan terakhir.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Jenis Kelamin</p>
+                    <p class="text-sm font-medium text-foreground">
+                      {{ selectedEmployee?.gender === 'L' ? 'Laki-laki' : (selectedEmployee?.gender === 'P' ? 'Perempuan' : selectedEmployee?.gender) }}
+                    </p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Tanggal Lahir</p>
+                    <p class="text-sm font-medium text-foreground">
+                      {{ selectedEmployee?.dateOfBirth ? new Date(selectedEmployee.dateOfBirth).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}
+                    </p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Kategori Profesi</p>
+                    <p class="text-sm font-medium text-foreground">{{ selectedEmployee?.professionCategory || 'Staff' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Email Pribadi</p>
+                    <p class="text-sm font-mono font-medium text-foreground">{{ selectedEmployee?.email || '-' }}</p>
+                  </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="lembur" class="mt-0 outline-none space-y-4">
-                <Card class="shadow-none border border-border/40 rounded-sm bg-card">
-                  <CardHeader class="pb-3 border-b border-border/40 flex flex-row items-center justify-between">
-                    <CardTitle class="text-sm font-bold text-foreground">Akumulasi Lembur</CardTitle>
-                    <Badge variant="outline" class="text-[10px] font-mono">Bulan Ini</Badge>
-                  </CardHeader>
-                  <CardContent class="pt-4">
-                    <div class="flex items-center gap-4">
-                      <div class="w-16 h-16 rounded-full border-4 border-primary/20 flex items-center justify-center">
-                        <span class="text-xl font-bold text-primary">12</span>
-                      </div>
-                      <div>
-                        <p class="text-sm font-bold text-foreground">Total Jam Lembur</p>
-                        <p class="text-xs text-muted-foreground mt-0.5">Disetujui dari 3 pengajuan lembur</p>
+              <TabsContent value="penempatan" class="mt-0 outline-none space-y-8 animate-in fade-in-50 duration-500">
+                <div class="pb-4 border-b border-border/40">
+                  <h3 class="text-xl font-bold text-foreground tracking-tight">Unit Kerja & Jabatan</h3>
+                  <p class="text-sm text-muted-foreground mt-1">Informasi struktural dan penempatan kerja aktif.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Departemen</p>
+                    <p class="text-sm font-bold text-foreground">{{ selectedEmployee?.department || 'Belum diatur' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Jabatan</p>
+                    <p class="text-sm font-medium text-foreground">{{ selectedEmployee?.position || 'Belum diatur' }}</p>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="kehadiran" class="mt-0 outline-none space-y-8 animate-in fade-in-50 duration-500">
+                <div class="flex items-end justify-between pb-4 border-b border-border/40">
+                  <div>
+                    <h3 class="text-xl font-bold text-foreground tracking-tight">Aktivitas Kehadiran</h3>
+                    <p class="text-sm text-muted-foreground mt-1">Timeline jam kerja dan log presensi.</p>
+                  </div>
+                  <Select v-model="attendancePeriod">
+                    <SelectTrigger class="w-[160px] h-8 text-xs font-semibold rounded-sm border-border bg-transparent">
+                      <SelectValue placeholder="Pilih Periode" />
+                    </SelectTrigger>
+                    <SelectContent class="rounded-sm border-border shadow-sm text-xs">
+                      <SelectItem value="1w">Seminggu Terakhir</SelectItem>
+                      <SelectItem value="2w">2 Minggu Terakhir</SelectItem>
+                      <SelectItem value="3w">3 Minggu Terakhir</SelectItem>
+                      <SelectItem value="4w">4 Minggu Terakhir</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <!-- Daily Timeline List -->
+                <div class="space-y-8">
+                  <div v-for="(day, idx) in mockupAttendance" :key="idx" class="space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="font-bold text-foreground">{{ day.dateStr }}</span>
+                      <div class="flex items-center gap-4">
+                        <span class="font-bold uppercase tracking-wider text-[10px]" :class="day.status === 'Terlambat' ? 'text-amber-500' : 'text-emerald-500'">{{ day.status }}</span>
+                        <span class="font-mono text-muted-foreground font-semibold">{{ day.totalHours }}</span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+
+                    <!-- Timeline Bar (07:00 - 19:00) -->
+                    <div class="relative w-full h-4 bg-muted/40 rounded-sm overflow-hidden border border-border/30">
+                      <div
+                        v-for="(seg, sIdx) in day.segments"
+                        :key="sIdx"
+                        class="absolute top-0 bottom-0 rounded-sm"
+                        :class="seg.color"
+                        :style="{ left: seg.left, width: seg.width }"
+                        :title="`${seg.start} - ${seg.end}`"
+                      ></div>
+                    </div>
+
+                    <!-- Time Axis Labels -->
+                    <div class="flex justify-between text-[10px] font-mono text-muted-foreground px-1">
+                      <span>07:00</span>
+                      <span>10:00</span>
+                      <span>13:00</span>
+                      <span>16:00</span>
+                      <span>19:00</span>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
+
+              <TabsContent value="cuti" class="mt-0 outline-none space-y-8 animate-in fade-in-50 duration-500">
+                <div class="pb-4 border-b border-border/40">
+                  <h3 class="text-xl font-bold text-foreground tracking-tight">Cuti & Izin</h3>
+                  <p class="text-sm text-muted-foreground mt-1">Sisa kuota tahunan dan riwayat ketidakhadiran.</p>
+                </div>
+
+                <div class="flex items-center justify-between p-6 bg-muted/20 border border-border/50 rounded-sm">
+                  <div class="space-y-1">
+                    <p class="text-xs font-bold text-muted-foreground uppercase tracking-widest">Sisa Cuti Tahunan</p>
+                    <p class="text-sm font-medium text-foreground">Dapat digunakan hingga 31 Desember {{ new Date().getFullYear() }}</p>
+                  </div>
+                  <div class="text-4xl font-bold text-foreground tracking-tighter">
+                    8 <span class="text-base font-semibold text-muted-foreground tracking-normal">hari</span>
+                  </div>
+                </div>
+
+                <div class="py-12 flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-muted/40 rounded-full flex items-center justify-center mb-4">
+                    <CalendarOff class="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <p class="text-sm font-bold text-foreground">Tidak ada riwayat cuti</p>
+                  <p class="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">Pegawai ini belum mengajukan cuti atau izin dalam 3 bulan terakhir.</p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="lembur" class="mt-0 outline-none space-y-8 animate-in fade-in-50 duration-500">
+                <div class="flex items-end justify-between pb-4 border-b border-border/40">
+                  <div>
+                    <h3 class="text-xl font-bold text-foreground tracking-tight">Catatan Lembur</h3>
+                    <p class="text-sm text-muted-foreground mt-1">Akumulasi jam lembur yang disetujui.</p>
+                  </div>
+                  <Badge variant="secondary" class="rounded-sm font-mono text-[10px]">Bulan Ini</Badge>
+                </div>
+
+                <div class="flex items-center gap-6">
+                  <div class="text-5xl font-bold text-foreground tracking-tighter">12<span class="text-xl font-medium text-muted-foreground tracking-normal ml-1">jam</span></div>
+                  <div class="h-10 w-[1px] bg-border"></div>
+                  <div>
+                    <p class="text-sm font-bold text-foreground">Total Disetujui</p>
+                    <p class="text-xs text-muted-foreground mt-1">Dari 3 pengajuan lembur yang valid.</p>
+                  </div>
+                </div>
+              </TabsContent>
+
             </div>
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
       </DialogContent>
     </Dialog>
 

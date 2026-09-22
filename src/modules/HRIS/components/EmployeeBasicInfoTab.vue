@@ -31,13 +31,13 @@ const getAge = (dob: string) => {
 
 <template>
   <div class="space-y-6">
-    <div class="bg-card/50 backdrop-blur-md border border-border/50 shadow-sm rounded-3xl overflow-hidden">
+    <div class="bg-card border-none shadow-none rounded-sm overflow-hidden">
       <div class="p-6 border-b border-border/50 flex items-center justify-between">
         <div>
           <h3 class="text-lg font-bold text-foreground tracking-tight">Informasi Dasar & Demografi</h3>
           <p class="text-xs text-muted-foreground">Profil identitas personal pegawai rumah sakit</p>
         </div>
-        <Button variant="outline" size="sm" class="rounded-xl font-bold text-xs h-9 gap-1.5" @click="emit('edit')">
+        <Button variant="outline" size="sm" class="rounded-sm font-bold text-xs h-9 gap-1.5" @click="emit('edit')">
           <Edit2 class="w-3.5 h-3.5" />
           Edit Profil
         </Button>
@@ -48,21 +48,21 @@ const getAge = (dob: string) => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2" v-for="i in 4" :key="i">
               <Skeleton class="h-4 w-28 bg-muted" />
-              <Skeleton class="h-12 w-full bg-muted rounded-2xl" />
+              <Skeleton class="h-12 w-full bg-muted rounded-sm" />
             </div>
           </div>
         </div>
 
         <div v-else class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <User class="w-3 h-3 text-primary" /> Nomor Induk Kepegawaian (NIK)
               </p>
               <p class="text-base text-foreground font-mono font-bold">{{ info.employeeNumber }}</p>
             </div>
 
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <User class="w-3 h-3 text-primary" /> Nama Lengkap
               </p>
@@ -71,21 +71,21 @@ const getAge = (dob: string) => {
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <Mail class="w-3 h-3 text-primary" /> Email Login Akun
               </p>
               <p class="text-xs font-mono font-semibold text-foreground truncate">{{ info.email || '-' }}</p>
             </div>
 
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Jenis Kelamin</p>
               <p class="text-sm text-foreground font-bold">
                 {{ info.gender === 'L' ? 'Laki-laki' : (info.gender === 'P' ? 'Perempuan' : info.gender) }}
               </p>
             </div>
 
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <Calendar class="w-3 h-3 text-primary" /> Tanggal Lahir (Usia)
               </p>
@@ -97,7 +97,7 @@ const getAge = (dob: string) => {
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <ShieldCheck class="w-3 h-3 text-primary" /> Status Kepegawaian
               </p>
@@ -106,14 +106,14 @@ const getAge = (dob: string) => {
               </Badge>
             </div>
 
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <Award class="w-3 h-3 text-primary" /> Kategori Profesi
               </p>
               <p class="text-sm text-foreground font-bold">{{ info.professionCategory || 'Staff' }}</p>
             </div>
 
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <Calendar class="w-3 h-3 text-primary" /> Tanggal Bergabung
               </p>
@@ -124,14 +124,14 @@ const getAge = (dob: string) => {
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <Building2 class="w-3 h-3 text-primary" /> Departemen / Divisi
               </p>
               <p class="text-sm text-foreground font-bold">{{ info.department || 'Belum diatur' }}</p>
             </div>
 
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <Briefcase class="w-3 h-3 text-primary" /> Posisi Jabatan
               </p>
@@ -140,14 +140,14 @@ const getAge = (dob: string) => {
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <ShieldCheck class="w-3 h-3 text-primary" /> PIN / ID Mesin Fingerprint
               </p>
               <p class="text-sm text-foreground font-mono font-bold">{{ info.fingerprintPin || info.employeeNumber }}</p>
             </div>
 
-            <div class="p-4 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors">
+            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
               <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <ShieldCheck class="w-3 h-3 text-primary" /> Nomor Kartu RFID
               </p>

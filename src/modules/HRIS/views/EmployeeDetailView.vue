@@ -158,7 +158,7 @@ const goBack = () => {
     <div class="transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] flex items-center justify-between gap-4 mb-6"
          :class="!isLoading ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
       <div class="flex items-center gap-4">
-        <Button variant="outline" size="icon" @click="goBack" class="h-10 w-10 shrink-0 bg-card border-border hover:bg-accent text-foreground rounded-2xl shadow-sm">
+        <Button variant="outline" size="icon" @click="goBack" class="h-10 w-10 shrink-0 bg-card border-border hover:bg-accent text-foreground rounded-sm shadow-sm">
           <ArrowLeft class="h-4 w-4" />
         </Button>
         <div>
@@ -175,7 +175,7 @@ const goBack = () => {
       </div>
 
       <div class="flex items-center gap-2">
-        <Button v-permission="'hris.employees.write'" class="bg-primary hover:bg-primary/90 text-primary-foreground h-10 px-4 font-bold text-xs rounded-xl shadow-sm flex items-center gap-2" @click="openEditModal">
+        <Button v-permission="'hris.employees.write'" class="bg-primary hover:bg-primary/90 text-primary-foreground h-10 px-4 font-bold text-xs rounded-sm shadow-sm flex items-center gap-2" @click="openEditModal">
           <Edit2 class="w-4 h-4" />
           Edit Profil Pegawai
         </Button>
@@ -183,7 +183,7 @@ const goBack = () => {
     </div>
 
     <!-- Main Tabs Layout -->
-    <div class="bg-card/80 backdrop-blur-xl border border-border/60 rounded-3xl shadow-sm overflow-hidden flex flex-col min-h-[600px] transition-all duration-700 delay-100 ease-out"
+    <div class="bg-card border-none rounded-sm shadow-sm overflow-hidden flex flex-col min-h-[600px] transition-all duration-700 delay-100 ease-out"
          :class="!isLoading ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'">
       <Tabs v-model="activeTab" class="w-full flex flex-col sm:flex-row h-full">
         <!-- Sidebar Navigation -->
@@ -193,28 +193,28 @@ const goBack = () => {
           <TabsList class="flex sm:flex-col h-auto w-full bg-transparent justify-start gap-2 p-0 overflow-x-auto sm:overflow-visible relative z-10">
             <TabsTrigger
               value="basic-info"
-              class="w-full justify-start text-left px-4 py-3 rounded-2xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+              class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
             >
               <UserSquare class="w-4 h-4 mr-3 shrink-0" />
               Informasi Dasar
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              class="w-full justify-start text-left px-4 py-3 rounded-2xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+              class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
             >
               <CalendarClock class="w-4 h-4 mr-3 shrink-0" />
               Riwayat Penempatan
             </TabsTrigger>
             <TabsTrigger
               value="credentials"
-              class="w-full justify-start text-left px-4 py-3 rounded-2xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+              class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
             >
               <ShieldCheck class="w-4 h-4 mr-3 shrink-0" />
               Kredensial & STR/SIP
             </TabsTrigger>
             <TabsTrigger
               value="family"
-              class="w-full justify-start text-left px-4 py-3 rounded-2xl data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+              class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
             >
               <Users class="w-4 h-4 mr-3 shrink-0" />
               Keluarga & Darurat
@@ -265,7 +265,7 @@ const goBack = () => {
 
     <!-- Complete Edit Employee Dialog -->
     <Dialog :open="isEditOpen" @update:open="isEditOpen = $event">
-      <DialogContent class="sm:max-w-[540px] bg-card border-border/60 rounded-3xl p-6 shadow-2xl">
+      <DialogContent class="sm:max-w-[800px] bg-card border-border p-6">
         <DialogHeader>
           <DialogTitle class="text-xl font-bold tracking-tight text-foreground">Edit Data Pegawai</DialogTitle>
           <DialogDescription class="text-xs font-medium text-muted-foreground">
@@ -280,7 +280,7 @@ const goBack = () => {
               <Input
                 id="detailEditNik"
                 v-model="editForm.employeeNumber"
-                class="bg-muted/50 border-border/50 rounded-xl"
+                class="bg-muted border-border rounded-sm"
               />
             </div>
             <div class="space-y-2">
@@ -288,7 +288,7 @@ const goBack = () => {
               <Input
                 id="detailEditFullName"
                 v-model="editForm.fullName"
-                class="bg-muted/50 border-border/50 rounded-xl"
+                class="bg-muted border-border rounded-sm"
               />
             </div>
           </div>
@@ -300,19 +300,19 @@ const goBack = () => {
                 id="detailEditDateOfBirth"
                 type="date"
                 v-model="editForm.dateOfBirth"
-                class="bg-muted/50 border-border/50 rounded-xl"
+                class="bg-muted border-border rounded-sm"
               />
             </div>
 
             <div class="space-y-2">
               <Label for="detailEditGender" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Jenis Kelamin</Label>
               <Select v-model="editForm.gender">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih jenis kelamin" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
-                  <SelectItem value="L" class="rounded-lg cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
-                  <SelectItem value="P" class="rounded-lg cursor-pointer text-xs font-medium">Perempuan</SelectItem>
+                <SelectContent class="rounded-sm border-border shadow-lg bg-popover text-popover-foreground">
+                  <SelectItem value="L" class="rounded-sm cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
+                  <SelectItem value="P" class="rounded-sm cursor-pointer text-xs font-medium">Perempuan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -322,13 +322,13 @@ const goBack = () => {
             <div class="space-y-2">
               <Label for="detailEditStatus" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Status Kepegawaian</Label>
               <Select v-model="editForm.status">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih status" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
-                  <SelectItem value="Aktif" class="rounded-lg text-xs">Aktif</SelectItem>
-                  <SelectItem value="Cuti" class="rounded-lg text-xs">Cuti</SelectItem>
-                  <SelectItem value="Resign" class="rounded-lg text-xs">Resign</SelectItem>
+                <SelectContent class="rounded-sm border-border shadow-lg bg-popover text-popover-foreground">
+                  <SelectItem value="Aktif" class="rounded-sm text-xs">Aktif</SelectItem>
+                  <SelectItem value="Cuti" class="rounded-sm text-xs">Cuti</SelectItem>
+                  <SelectItem value="Resign" class="rounded-sm text-xs">Resign</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -336,15 +336,15 @@ const goBack = () => {
             <div class="space-y-2">
               <Label for="detailEditProfession" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Kategori Profesi</Label>
               <Select v-model="editForm.professionCategory">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Kategori" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
-                  <SelectItem value="Medis" class="rounded-lg text-xs">Medis (Dokter)</SelectItem>
-                  <SelectItem value="Keperawatan" class="rounded-lg text-xs">Keperawatan / Bidan</SelectItem>
-                  <SelectItem value="Penunjang Medis" class="rounded-lg text-xs">Penunjang Medis</SelectItem>
-                  <SelectItem value="Non-Medis" class="rounded-lg text-xs">Non-Medis</SelectItem>
-                  <SelectItem value="Staff" class="rounded-lg text-xs">Staf Umum / Administrasi</SelectItem>
+                <SelectContent class="rounded-sm border-border shadow-lg bg-popover text-popover-foreground">
+                  <SelectItem value="Medis" class="rounded-sm text-xs">Medis (Dokter)</SelectItem>
+                  <SelectItem value="Keperawatan" class="rounded-sm text-xs">Keperawatan / Bidan</SelectItem>
+                  <SelectItem value="Penunjang Medis" class="rounded-sm text-xs">Penunjang Medis</SelectItem>
+                  <SelectItem value="Non-Medis" class="rounded-sm text-xs">Non-Medis</SelectItem>
+                  <SelectItem value="Staff" class="rounded-sm text-xs">Staf Umum / Administrasi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -354,10 +354,10 @@ const goBack = () => {
             <div class="space-y-2">
               <Label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Departemen / Divisi</Label>
               <Select v-model="editForm.departmentId">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih Departemen" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground max-h-56">
+                <SelectContent class="rounded-sm border-border shadow-lg bg-popover text-popover-foreground max-h-56">
                   <SelectItem v-for="dept in departments" :key="dept.id" :value="dept.id" class="text-xs">
                     {{ dept.name }}
                   </SelectItem>
@@ -368,10 +368,10 @@ const goBack = () => {
             <div class="space-y-2">
               <Label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Posisi Jabatan</Label>
               <Select v-model="editForm.jobPositionId">
-                <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih Jabatan" />
                 </SelectTrigger>
-                <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground max-h-56">
+                <SelectContent class="rounded-sm border-border shadow-lg bg-popover text-popover-foreground max-h-56">
                   <SelectItem v-for="job in jobPositions" :key="job.id" :value="job.id" class="text-xs">
                     {{ job.name }}
                   </SelectItem>
@@ -386,15 +386,15 @@ const goBack = () => {
               id="detailEditFingerprintPin"
               v-model="editForm.fingerprintPin"
               placeholder="Contoh: 101 (Default: mengikuti NIK)"
-              class="bg-muted/50 border-border/50 rounded-xl font-mono"
+              class="bg-muted border-border rounded-sm font-mono"
             />
           </div>
 
           <DialogFooter class="pt-4">
-            <Button variant="outline" type="button" @click="isEditOpen = false" :disabled="isSubmittingEdit" class="rounded-xl font-bold text-xs h-10">
+            <Button variant="outline" type="button" @click="isEditOpen = false" :disabled="isSubmittingEdit" class="rounded-sm font-bold text-xs h-10">
               Batal
             </Button>
-            <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs h-10 px-6 shadow-sm" :disabled="isSubmittingEdit">
+            <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm font-bold text-xs h-10 px-6 shadow-sm" :disabled="isSubmittingEdit">
               <Loader2 v-if="isSubmittingEdit" class="w-3.5 h-3.5 mr-2 animate-spin" />
               {{ isSubmittingEdit ? 'Menyimpan...' : 'Simpan Perubahan' }}
             </Button>

@@ -487,78 +487,81 @@ const mockupAttendance = ref([
 
     <!-- Dialog for Employee Detail -->
     <Dialog v-model:open="isDetailOpen">
-      <DialogContent class="sm:max-w-5xl w-[95vw] p-0 h-[85vh] bg-card border-border overflow-hidden rounded-sm flex flex-col">
-        <Tabs defaultValue="profil" class="w-full h-full flex flex-col sm:flex-row">
+      <DialogContent class="sm:max-w-4xl w-[95vw] p-0 h-[85vh] bg-card border-border overflow-hidden rounded-sm flex flex-col">
+        <Tabs v-model="activeTab" class="w-full h-full flex flex-col">
 
-          <!-- Left Sidebar: Profile & Nav -->
-          <div class="w-full sm:w-[280px] md:w-[320px] bg-muted/10 border-b sm:border-b-0 sm:border-r border-border/50 shrink-0 flex flex-col h-full z-10">
-            <!-- Profile Area -->
-            <div class="p-6 pb-5 border-b border-border/40">
-              <div class="flex items-center justify-between mb-5">
-                <div class="flex items-center gap-1 bg-background border border-border/60 rounded-sm p-0.5 shadow-sm">
-                  <Button variant="ghost" size="icon" class="h-6 w-6 rounded-[2px]" :disabled="!hasPrevEmployee" @click="goPrevEmployee">
-                    <ChevronLeft class="w-3.5 h-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" class="h-6 w-6 rounded-[2px]" :disabled="!hasNextEmployee" @click="goNextEmployee">
-                    <ChevronRight class="w-3.5 h-3.5" />
-                  </Button>
+          <!-- Enterprise Header & Tabs -->
+          <div class="pt-8 px-8 pb-0 bg-card border-b border-border/40 shrink-0 z-10">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+              <div class="flex items-start gap-5">
+                <Avatar class="w-16 h-16 border border-border/50 shadow-sm rounded-sm">
+                  <AvatarFallback class="bg-primary/5 text-primary text-xl font-bold rounded-sm">
+                    {{ selectedEmployee?.fullName?.charAt(0) || 'U' }}
+                  </AvatarFallback>
+                </Avatar>
+                <div class="pt-1">
+                  <div class="flex items-center gap-3">
+                    <DialogTitle class="text-2xl font-bold tracking-tight text-foreground">{{ selectedEmployee?.fullName }}</DialogTitle>
+                    <Badge :variant="getStatusVariant(selectedEmployee?.status || 'Aktif')" class="text-[10px] uppercase font-bold px-2 py-0.5 shadow-none">{{ selectedEmployee?.status || 'Aktif' }}</Badge>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2 mt-2 text-xs font-medium text-muted-foreground">
+                    <span class="font-mono text-foreground font-semibold">{{ selectedEmployee?.employeeNumber }}</span>
+                    <span class="text-border">&bull;</span>
+                    <span>{{ selectedEmployee?.department || 'Umum' }}</span>
+                    <span class="text-border">&bull;</span>
+                    <span>{{ selectedEmployee?.position || 'Posisi belum diatur' }}</span>
+                  </div>
                 </div>
-                <Button variant="ghost" size="icon" class="h-7 w-7 rounded-sm text-muted-foreground hover:text-foreground" title="Buka Halaman Penuh" @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null">
-                  <ExternalLink class="w-3.5 h-3.5" />
-                </Button>
               </div>
 
-              <Avatar class="w-16 h-16 mb-4 border border-border shadow-sm rounded-sm">
-                <AvatarFallback class="bg-primary/10 text-primary text-xl font-bold rounded-sm">
-                  {{ selectedEmployee?.fullName?.charAt(0) || 'U' }}
-                </AvatarFallback>
-              </Avatar>
-              <h2 class="text-lg font-bold text-foreground leading-tight">{{ selectedEmployee?.fullName }}</h2>
-              <p class="text-[11px] font-mono font-medium text-muted-foreground mt-1">NIK: {{ selectedEmployee?.employeeNumber }}</p>
-
-              <div class="mt-4 flex flex-wrap gap-2 items-center">
-                <Badge :variant="getStatusVariant(selectedEmployee?.status || 'Aktif')" class="text-[9px] font-bold uppercase px-1.5 py-0">
-                  {{ selectedEmployee?.status || 'Aktif' }}
-                </Badge>
-                <span class="text-[10px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-sm uppercase tracking-wider border border-border/50">
-                  {{ selectedEmployee?.department || 'Umum' }}
-                </span>
+              <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center gap-1 bg-muted/20 border border-border/40 rounded-sm p-0.5">
+                  <Button variant="ghost" size="icon" class="h-7 w-7 rounded-[2px]" :disabled="!hasPrevEmployee" @click="goPrevEmployee">
+                    <ChevronLeft class="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" class="h-7 w-7 rounded-[2px]" :disabled="!hasNextEmployee" @click="goNextEmployee">
+                    <ChevronRight class="w-4 h-4" />
+                  </Button>
+                </div>
+                <Button variant="outline" class="rounded-sm font-bold text-xs h-8 px-4" @click="selectedEmployee ? $router.push({ path: '/hris/employees/' + selectedEmployee.id }) : null">
+                  <ExternalLink class="w-3.5 h-3.5 mr-2" />
+                  Halaman Penuh
+                </Button>
               </div>
             </div>
 
-            <!-- Navigation Menu (Tabs) -->
-            <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 px-2">Menu Pegawai</p>
-              <TabsList class="flex flex-col h-auto bg-transparent p-0 gap-1 w-full items-start">
+            <!-- Horizontal Underline Tabs -->
+            <div class="mt-8">
+              <TabsList class="w-full justify-start h-auto p-0 bg-transparent gap-8 overflow-x-auto flex-nowrap border-none">
                 <TabsTrigger
                   value="profil"
-                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground text-muted-foreground bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-sm font-bold whitespace-nowrap hover:text-foreground transition-colors"
                 >
-                  <UserSquare class="w-4 h-4 mr-3" /> Profil Personal
+                  Profil Personal
                 </TabsTrigger>
                 <TabsTrigger
                   value="penempatan"
-                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground text-muted-foreground bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-sm font-bold whitespace-nowrap hover:text-foreground transition-colors"
                 >
-                  <Building2 class="w-4 h-4 mr-3" /> Unit Kerja & Jabatan
+                  Penempatan
                 </TabsTrigger>
                 <TabsTrigger
                   value="kehadiran"
-                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground text-muted-foreground bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-sm font-bold whitespace-nowrap hover:text-foreground transition-colors"
                 >
-                  <CalendarDays class="w-4 h-4 mr-3" /> Kehadiran
+                  Kehadiran
                 </TabsTrigger>
                 <TabsTrigger
                   value="cuti"
-                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground text-muted-foreground bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-sm font-bold whitespace-nowrap hover:text-foreground transition-colors"
                 >
-                  <CalendarOff class="w-4 h-4 mr-3" /> Cuti & Izin
+                  Cuti & Izin
                 </TabsTrigger>
                 <TabsTrigger
                   value="lembur"
-                  class="w-full justify-start px-3 py-2.5 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold transition-colors border border-transparent text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+                  class="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-foreground text-muted-foreground bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 py-3 text-sm font-bold whitespace-nowrap hover:text-foreground transition-colors"
                 >
-                  <Clock class="w-4 h-4 mr-3" /> Lembur
+                  Lembur
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -566,7 +569,7 @@ const mockupAttendance = ref([
 
           <!-- Right Content Area -->
           <div class="flex-1 bg-background overflow-y-auto custom-scrollbar relative">
-            <div class="p-8 sm:p-10 max-w-3xl mx-auto space-y-8">
+            <div class="p-8 sm:p-10 max-w-4xl mx-auto space-y-8">
               <TabsContent value="profil" class="mt-0 outline-none space-y-8 animate-in fade-in-50 duration-500">
                 <div class="pb-4 border-b border-border/40">
                   <h3 class="text-xl font-bold text-foreground tracking-tight">Informasi Personal</h3>
@@ -575,13 +578,13 @@ const mockupAttendance = ref([
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
                   <div class="space-y-1">
-                    <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Jenis Kelamin</p>
+                    <p class="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Jenis Kelamin</p>
                     <p class="text-sm font-medium text-foreground">
                       {{ selectedEmployee?.gender === 'L' ? 'Laki-laki' : (selectedEmployee?.gender === 'P' ? 'Perempuan' : selectedEmployee?.gender) }}
                     </p>
                   </div>
                   <div class="space-y-1">
-                    <p class="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Tanggal Lahir</p>
+                    <p class="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Tanggal Lahir</p>
                     <p class="text-sm font-medium text-foreground">
                       {{ selectedEmployee?.dateOfBirth ? new Date(selectedEmployee.dateOfBirth).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}
                     </p>

@@ -71,6 +71,9 @@ const isDetailOpen = ref(false)
 const selectedEmployee = ref<Employee | null>(null)
 const isLoaded = ref(false)
 
+// Tab state for detail dialog
+const activeTab = ref('profil')
+
 // Create Form Dialog State
 const isFormOpen = ref(false)
 

@@ -8,6 +8,7 @@ import { Edit2, Mail, Calendar, User, Building2, Briefcase, Award, ShieldCheck }
 const props = defineProps<{
   employeeId: string
   employeeData?: any
+  hideEditButton?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -31,128 +32,113 @@ const getAge = (dob: string) => {
 
 <template>
   <div class="space-y-6">
-    <div class="bg-card border-none shadow-none rounded-sm overflow-hidden">
-      <div class="p-6 border-b border-border/50 flex items-center justify-between">
+    <div class="bg-card border-none shadow-none rounded-sm">
+      <div class="p-6 sm:p-8 flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-bold text-foreground tracking-tight">Informasi Dasar & Demografi</h3>
-          <p class="text-xs text-muted-foreground">Profil identitas personal pegawai rumah sakit</p>
+          <h3 class="text-xl font-bold text-foreground tracking-tight">Informasi Personal</h3>
+          <p class="text-sm text-muted-foreground mt-1">Data demografi dan profil kepegawaian</p>
         </div>
-        <Button variant="outline" size="sm" class="rounded-sm font-bold text-xs h-9 gap-1.5" @click="emit('edit')">
+        <Button v-if="!props.hideEditButton" variant="outline" size="sm" class="rounded-sm font-bold text-xs h-9 gap-1.5" @click="emit('edit')">
           <Edit2 class="w-3.5 h-3.5" />
           Edit Profil
         </Button>
       </div>
 
-      <div class="p-6">
-        <div v-if="!info" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-2" v-for="i in 4" :key="i">
-              <Skeleton class="h-4 w-28 bg-muted" />
-              <Skeleton class="h-12 w-full bg-muted rounded-sm" />
+      <div class="px-6 sm:px-8 pb-8">
+        <div v-if="!info" class="space-y-8">
+          <div v-for="section in 2" :key="section" class="space-y-4">
+            <Skeleton class="h-4 w-40 bg-muted mb-6" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div class="space-y-2" v-for="i in 4" :key="i">
+                <Skeleton class="h-3 w-28 bg-muted" />
+                <Skeleton class="h-5 w-48 bg-muted" />
+              </div>
             </div>
           </div>
         </div>
 
-        <div v-else class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <User class="w-3 h-3 text-primary" /> Nomor Induk Kepegawaian (NIK)
-              </p>
-              <p class="text-base text-foreground font-mono font-bold">{{ info.employeeNumber }}</p>
-            </div>
-
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <User class="w-3 h-3 text-primary" /> Nama Lengkap
-              </p>
-              <p class="text-base text-foreground font-bold">{{ info.fullName }}</p>
-            </div>
+        <div v-else class="space-y-12">
+          <!-- Section 1: Identitas -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2 border-b border-border/40">Identitas & Kontak</h4>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <User class="w-3.5 h-3.5 text-primary" /> Nomor Induk Kependudukan
+                </dt>
+                <dd class="text-sm text-foreground font-mono font-medium">{{ info.identityNumber || '-' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <User class="w-3.5 h-3.5 text-primary" /> NIP (Nomor Pegawai)
+                </dt>
+                <dd class="text-sm text-foreground font-mono font-bold">{{ info.employeeNumber }}</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <User class="w-3.5 h-3.5 text-primary" /> Nama Lengkap
+                </dt>
+                <dd class="text-base text-foreground font-semibold">{{ info.fullName }}</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <Mail class="w-3.5 h-3.5 text-primary" /> Email Akun
+                </dt>
+                <dd class="text-sm text-foreground font-mono">{{ info.email || '-' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground mb-1.5">Jenis Kelamin</dt>
+                <dd class="text-sm text-foreground">{{ info.gender === 'L' ? 'Laki-laki' : (info.gender === 'P' ? 'Perempuan' : info.gender) }}</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <Calendar class="w-3.5 h-3.5 text-primary" /> Tanggal Lahir (Usia)
+                </dt>
+                <dd class="text-sm text-foreground">
+                  {{ info.dateOfBirth ? new Date(info.dateOfBirth).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}
+                  <span class="text-muted-foreground text-xs ml-1 font-medium">({{ getAge(info.dateOfBirth) }})</span>
+                </dd>
+              </div>
+            </dl>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <Mail class="w-3 h-3 text-primary" /> Email Login Akun
-              </p>
-              <p class="text-xs font-mono font-semibold text-foreground truncate">{{ info.email || '-' }}</p>
-            </div>
-
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Jenis Kelamin</p>
-              <p class="text-sm text-foreground font-bold">
-                {{ info.gender === 'L' ? 'Laki-laki' : (info.gender === 'P' ? 'Perempuan' : info.gender) }}
-              </p>
-            </div>
-
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <Calendar class="w-3 h-3 text-primary" /> Tanggal Lahir (Usia)
-              </p>
-              <p class="text-sm text-foreground font-bold">
-                {{ info.dateOfBirth ? new Date(info.dateOfBirth).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}
-                <span class="text-xs text-muted-foreground font-medium">({{ getAge(info.dateOfBirth) }})</span>
-              </p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <ShieldCheck class="w-3 h-3 text-primary" /> Status Kepegawaian
-              </p>
-              <Badge variant="default" class="text-[10px] font-bold uppercase tracking-wider mt-1">
-                {{ info.status || 'Aktif' }}
-              </Badge>
-            </div>
-
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <Award class="w-3 h-3 text-primary" /> Kategori Profesi
-              </p>
-              <p class="text-sm text-foreground font-bold">{{ info.professionCategory || 'Staff' }}</p>
-            </div>
-
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <Calendar class="w-3 h-3 text-primary" /> Tanggal Bergabung
-              </p>
-              <p class="text-sm text-foreground font-bold">
-                {{ info.joinDate ? new Date(info.joinDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}
-              </p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <Building2 class="w-3 h-3 text-primary" /> Departemen / Divisi
-              </p>
-              <p class="text-sm text-foreground font-bold">{{ info.department || 'Belum diatur' }}</p>
-            </div>
-
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <Briefcase class="w-3 h-3 text-primary" /> Posisi Jabatan
-              </p>
-              <p class="text-sm text-foreground font-bold">{{ info.position || 'Belum diatur' }}</p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <ShieldCheck class="w-3 h-3 text-primary" /> PIN / ID Mesin Fingerprint
-              </p>
-              <p class="text-sm text-foreground font-mono font-bold">{{ info.fingerprintPin || info.employeeNumber }}</p>
-            </div>
-
-            <div class="p-4 rounded-sm bg-muted/30 border-none hover:bg-muted/50 transition-colors">
-              <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <ShieldCheck class="w-3 h-3 text-primary" /> Nomor Kartu RFID
-              </p>
-              <p class="text-sm text-foreground font-mono font-bold">{{ info.cardNumber || '-' }}</p>
-            </div>
+          <!-- Section 2: Kepegawaian -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2 border-b border-border/40">Status & Penempatan</h4>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                  <ShieldCheck class="w-3.5 h-3.5 text-primary" /> Status Kepegawaian
+                </dt>
+                <dd><Badge variant="outline" class="text-[10px] font-bold uppercase tracking-wider bg-background">{{ info.status || 'Aktif' }}</Badge></dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <Award class="w-3.5 h-3.5 text-primary" /> Kategori Profesi
+                </dt>
+                <dd class="text-sm text-foreground font-medium">{{ info.professionCategory || 'Staff' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <Building2 class="w-3.5 h-3.5 text-primary" /> Departemen / Divisi
+                </dt>
+                <dd class="text-sm text-foreground font-semibold">{{ info.department || 'Belum diatur' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <Briefcase class="w-3.5 h-3.5 text-primary" /> Posisi Jabatan
+                </dt>
+                <dd class="text-sm text-foreground font-semibold">{{ info.position || 'Belum diatur' }}</dd>
+              </div>
+              <div>
+                <dt class="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                  <Calendar class="w-3.5 h-3.5 text-primary" /> Tanggal Bergabung
+                </dt>
+                <dd class="text-sm text-foreground">
+                  {{ info.joinDate ? new Date(info.joinDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}
+                </dd>
+              </div>
+            </dl>
           </div>
         </div>
       </div>

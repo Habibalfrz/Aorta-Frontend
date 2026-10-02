@@ -21,16 +21,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { ArrowLeft, UserSquare, CalendarClock, ShieldCheck, Users, Edit2, Loader2 } from 'lucide-vue-next'
+import { ArrowLeft, CalendarClock, ShieldCheck, Users, Loader2 } from 'lucide-vue-next'
 import api from '@/api/axios'
 import { toast } from 'vue-sonner'
-import { updateEmployee, getDepartments, getJobPositions } from '@/api/hris'
+import { updateEmployee, getDepartments, getJobPositions, getEmployeeContracts, createEmployeeContract, getEmployeeDocuments } from '@/api/hris'
 
 // Import lazy-loaded child components for the tabs
 import EmployeeBasicInfoTab from '../components/EmployeeBasicInfoTab.vue'
+import EmployeeCurrentStatusTab from '../components/EmployeeCurrentStatusTab.vue'
 import EmployeeHistoryTab from '../components/EmployeeHistoryTab.vue'
 import EmployeeCredentialsTab from '../components/EmployeeCredentialsTab.vue'
 import EmployeeFamilyTab from '../components/EmployeeFamilyTab.vue'
+import EmployeeContractTab from '../components/EmployeeContractTab.vue'
+import EmployeeDocumentTab from '../components/EmployeeDocumentTab.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -48,6 +51,7 @@ const isEditOpen = ref(false)
 const isSubmittingEdit = ref(false)
 const editForm = ref<{
   id: string;
+  identityNumber: string;
   employeeNumber: string;
   fullName: string;
   dateOfBirth: string;
@@ -59,12 +63,13 @@ const editForm = ref<{
   fingerprintPin?: string;
 }>({
   id: '',
+  identityNumber: '',
   employeeNumber: '',
   fullName: '',
   dateOfBirth: '',
   gender: 'L',
   status: 'Aktif',
-  professionCategory: 'Staff',
+  professionCategory: 'Non-Kesehatan',
   fingerprintPin: ''
 })
 
@@ -78,6 +83,63 @@ const fetchEmployeeDetail = async () => {
     toast.error('Gagal memuat detail pegawai')
   } finally {
     isLoading.value = false
+  }
+}
+
+// --- Contracts State ---
+const contracts = ref<any[]>([])
+const isLoadingContracts = ref(false)
+const isContractModalOpen = ref(false)
+const isSubmittingContract = ref(false)
+const contractForm = ref({
+  contractType: '',
+  startDate: '',
+  endDate: ''
+})
+
+// --- Documents State ---
+const documents = ref<any[]>([])
+const isLoadingDocuments = ref(false)
+
+const fetchDocuments = async () => {
+  isLoadingDocuments.value = true
+  try {
+    const data = await getEmployeeDocuments(employeeId.value)
+    documents.value = data || []
+  } catch (e) {
+    toast.error('Gagal memuat dokumen pegawai')
+  } finally {
+    isLoadingDocuments.value = false
+  }
+}
+
+const fetchContracts = async () => {
+  isLoadingContracts.value = true
+  try {
+    const data = await getEmployeeContracts(employeeId.value)
+    contracts.value = data || []
+  } catch (e) {
+    toast.error('Gagal memuat riwayat kontrak')
+  } finally {
+    isLoadingContracts.value = false
+  }
+}
+
+const submitContract = async () => {
+  if (!contractForm.value.contractType || !contractForm.value.startDate) {
+    toast.error('Status dan Tanggal Mulai wajib diisi')
+    return
+  }
+  isSubmittingContract.value = true
+  try {
+    await createEmployeeContract(employeeId.value, contractForm.value)
+    toast.success('Status kepegawaian berhasil diperbarui')
+    isContractModalOpen.value = false
+    await fetchContracts()
+  } catch (e) {
+    toast.error('Gagal memperbarui status kepegawaian')
+  } finally {
+    isSubmittingContract.value = false
   }
 }
 
@@ -98,12 +160,13 @@ const openEditModal = () => {
   if (!employeeData.value) return
   editForm.value = {
     id: employeeData.value.id,
+    identityNumber: employeeData.value.identityNumber || '',
     employeeNumber: employeeData.value.employeeNumber,
     fullName: employeeData.value.fullName,
     dateOfBirth: employeeData.value.dateOfBirth ? employeeData.value.dateOfBirth.split('T')[0] : '',
     gender: (employeeData.value.gender === 'P' ? 'P' : 'L') as 'L' | 'P',
     status: employeeData.value.status || 'Aktif',
-    professionCategory: employeeData.value.professionCategory || 'Staff',
+    professionCategory: employeeData.value.professionCategory || 'Non-Kesehatan',
     departmentId: employeeData.value.departmentId,
     jobPositionId: employeeData.value.jobPositionId,
     fingerprintPin: employeeData.value.fingerprintPin || ''
@@ -112,8 +175,8 @@ const openEditModal = () => {
 }
 
 const handleSaveEdit = async () => {
-  if (!editForm.value.fullName || !editForm.value.employeeNumber) {
-    toast.error('NIK dan Nama lengkap wajib diisi')
+  if (!editForm.value.fullName || !editForm.value.employeeNumber || !editForm.value.identityNumber) {
+    toast.error('No. KTP, NIP, dan Nama lengkap wajib diisi')
     return
   }
 
@@ -121,6 +184,7 @@ const handleSaveEdit = async () => {
   try {
     await updateEmployee(editForm.value.id, {
       id: editForm.value.id,
+      identityNumber: editForm.value.identityNumber,
       employeeNumber: editForm.value.employeeNumber,
       fullName: editForm.value.fullName,
       dateOfBirth: editForm.value.dateOfBirth ? new Date(editForm.value.dateOfBirth).toISOString() : new Date().toISOString(),
@@ -145,6 +209,8 @@ const handleSaveEdit = async () => {
 onMounted(() => {
   fetchEmployeeDetail()
   fetchMasterData()
+  fetchContracts()
+  fetchDocuments()
 })
 
 const goBack = () => {
@@ -173,13 +239,6 @@ const goBack = () => {
           </p>
         </div>
       </div>
-
-      <div class="flex items-center gap-2">
-        <Button v-permission="'hris.employees.write'" class="bg-primary hover:bg-primary/90 text-primary-foreground h-10 px-4 font-bold text-xs rounded-sm shadow-sm flex items-center gap-2" @click="openEditModal">
-          <Edit2 class="w-4 h-4" />
-          Edit Profil Pegawai
-        </Button>
-      </div>
     </div>
 
     <!-- Main Tabs Layout -->
@@ -199,6 +258,13 @@ const goBack = () => {
               Informasi Dasar
             </TabsTrigger>
             <TabsTrigger
+              value="current-status"
+              class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+            >
+              <ShieldCheck class="w-4 h-4 mr-3 shrink-0" />
+              Status Kontrak & Penempatan
+            </TabsTrigger>
+            <TabsTrigger
               value="history"
               class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
             >
@@ -206,11 +272,12 @@ const goBack = () => {
               Riwayat Penempatan
             </TabsTrigger>
             <TabsTrigger
+              v-if="['Medis', 'Keperawatan', 'Penunjang Medis'].includes(employeeData?.professionCategory)"
               value="credentials"
               class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
             >
               <ShieldCheck class="w-4 h-4 mr-3 shrink-0" />
-              Kredensial & STR/SIP
+              Kredensial Medis
             </TabsTrigger>
             <TabsTrigger
               value="family"
@@ -218,6 +285,20 @@ const goBack = () => {
             >
               <Users class="w-4 h-4 mr-3 shrink-0" />
               Keluarga & Darurat
+            </TabsTrigger>
+            <TabsTrigger
+              value="contracts"
+              class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+            >
+              <ShieldCheck class="w-4 h-4 mr-3 shrink-0" />
+              Riwayat Kontrak
+            </TabsTrigger>
+            <TabsTrigger
+              value="documents"
+              class="w-full justify-start text-left px-4 py-3 rounded-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-colors border border-transparent whitespace-nowrap text-muted-foreground font-medium hover:bg-accent/50 text-xs"
+            >
+              <UserSquare class="w-4 h-4 mr-3 shrink-0" />
+              Dokumen Pegawai
             </TabsTrigger>
           </TabsList>
         </div>
@@ -230,6 +311,18 @@ const goBack = () => {
               :employee-id="employeeId"
               :employee-data="employeeData"
               @edit="openEditModal"
+            />
+          </TabsContent>
+
+          <TabsContent value="current-status" class="mt-0 outline-none">
+            <EmployeeCurrentStatusTab
+              v-if="activeTab === 'current-status'"
+              :employee-id="employeeId"
+              :employee-data="employeeData"
+              :departments="departments"
+              :job-positions="jobPositions"
+              :contracts="contracts"
+              @refetch="() => { fetchEmployeeDetail(); fetchContracts(); }"
             />
           </TabsContent>
 
@@ -259,6 +352,26 @@ const goBack = () => {
               :employee-id="employeeId"
             />
           </TabsContent>
+
+          <TabsContent value="contracts" class="mt-0 outline-none">
+            <EmployeeContractTab
+              v-if="activeTab === 'contracts'"
+              :employee-id="employeeId"
+              :contracts="contracts"
+              :is-loading-contracts="isLoadingContracts"
+              @refetch="fetchContracts"
+            />
+          </TabsContent>
+
+          <TabsContent value="documents" class="mt-0 outline-none">
+            <EmployeeDocumentTab
+              v-if="activeTab === 'documents'"
+              :employee-id="employeeId"
+              :documents="documents"
+              :is-loading-documents="isLoadingDocuments"
+              @refetch="fetchDocuments"
+            />
+          </TabsContent>
         </div>
       </Tabs>
     </div>
@@ -276,21 +389,30 @@ const goBack = () => {
         <form @submit.prevent="handleSaveEdit" class="space-y-4 py-4">
           <div class="grid grid-cols-2 gap-3">
             <div class="space-y-2">
-              <Label for="detailEditNik" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">NIK <span class="text-destructive">*</span></Label>
+              <Label for="detailEditIdentity" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">No. KTP / NIK Penduduk <span class="text-destructive">*</span></Label>
+              <Input
+                id="detailEditIdentity"
+                v-model="editForm.identityNumber"
+                class="bg-muted border-border rounded-sm"
+              />
+            </div>
+            <div class="space-y-2">
+              <Label for="detailEditNik" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">NIP Kepegawaian <span class="text-destructive">*</span></Label>
               <Input
                 id="detailEditNik"
                 v-model="editForm.employeeNumber"
                 class="bg-muted border-border rounded-sm"
               />
             </div>
-            <div class="space-y-2">
-              <Label for="detailEditFullName" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nama Lengkap <span class="text-destructive">*</span></Label>
-              <Input
-                id="detailEditFullName"
-                v-model="editForm.fullName"
-                class="bg-muted border-border rounded-sm"
-              />
-            </div>
+          </div>
+
+          <div class="space-y-2">
+            <Label for="detailEditFullName" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nama Lengkap <span class="text-destructive">*</span></Label>
+            <Input
+              id="detailEditFullName"
+              v-model="editForm.fullName"
+              class="bg-muted border-border rounded-sm"
+            />
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -310,7 +432,7 @@ const goBack = () => {
                 <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih jenis kelamin" />
                 </SelectTrigger>
-                <SelectContent class="rounded-sm border-border shadow-lg bg-popover text-popover-foreground">
+                <SelectContent class="rounded-sm border-border shadow-xl bg-white dark:bg-zinc-950 text-foreground">
                   <SelectItem value="L" class="rounded-sm cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
                   <SelectItem value="P" class="rounded-sm cursor-pointer text-xs font-medium">Perempuan</SelectItem>
                 </SelectContent>
@@ -325,7 +447,7 @@ const goBack = () => {
                 <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Pilih status" />
                 </SelectTrigger>
-                <SelectContent class="rounded-sm border-border shadow-lg bg-popover text-popover-foreground">
+                <SelectContent class="rounded-sm border-border shadow-xl bg-white dark:bg-zinc-950 text-foreground">
                   <SelectItem value="Aktif" class="rounded-sm text-xs">Aktif</SelectItem>
                   <SelectItem value="Cuti" class="rounded-sm text-xs">Cuti</SelectItem>
                   <SelectItem value="Resign" class="rounded-sm text-xs">Resign</SelectItem>
@@ -339,12 +461,11 @@ const goBack = () => {
                 <SelectTrigger class="bg-muted border-border rounded-sm">
                   <SelectValue placeholder="Kategori" />
                 </SelectTrigger>
-                <SelectContent class="rounded-sm border-border shadow-lg bg-popover text-popover-foreground">
+                <SelectContent class="rounded-sm border-border shadow-xl bg-white dark:bg-zinc-950 text-foreground">
                   <SelectItem value="Medis" class="rounded-sm text-xs">Medis (Dokter)</SelectItem>
-                  <SelectItem value="Keperawatan" class="rounded-sm text-xs">Keperawatan / Bidan</SelectItem>
-                  <SelectItem value="Penunjang Medis" class="rounded-sm text-xs">Penunjang Medis</SelectItem>
-                  <SelectItem value="Non-Medis" class="rounded-sm text-xs">Non-Medis</SelectItem>
-                  <SelectItem value="Staff" class="rounded-sm text-xs">Staf Umum / Administrasi</SelectItem>
+                  <SelectItem value="Keperawatan" class="rounded-sm text-xs">Keperawatan & Kebidanan</SelectItem>
+                  <SelectItem value="Penunjang Medis" class="rounded-sm text-xs">Tenaga Kesehatan Lainnya (Apoteker, Lab)</SelectItem>
+                  <SelectItem value="Non-Kesehatan" class="rounded-sm text-xs">Tenaga Non-Kesehatan (Manajemen, Umum)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -402,5 +523,49 @@ const goBack = () => {
         </form>
       </DialogContent>
     </Dialog>
+    <!-- Contract Modal -->
+    <Dialog :open="isContractModalOpen" @update:open="isContractModalOpen = $event">
+      <DialogContent class="sm:max-w-[420px] bg-card border-border/60 rounded-3xl p-6 shadow-2xl">
+        <DialogHeader>
+          <DialogTitle class="text-xl font-bold text-foreground">Perbarui Status Kepegawaian</DialogTitle>
+          <DialogDescription class="text-xs text-muted-foreground">Status yang lama akan otomatis diarsipkan menjadi riwayat.</DialogDescription>
+        </DialogHeader>
+        <form @submit.prevent="submitContract" class="space-y-4 py-4">
+          <div class="space-y-2">
+            <Label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Jenis Status / Kontrak Baru</Label>
+            <Select v-model="contractForm.contractType">
+              <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl">
+                <SelectValue placeholder="Pilih Jenis" />
+              </SelectTrigger>
+              <SelectContent class="rounded-xl border-border shadow-xl bg-card z-50">
+                <SelectItem value="Probation" class="text-xs">Probation</SelectItem>
+                <SelectItem value="PKWT" class="text-xs">Kontrak (PKWT)</SelectItem>
+                <SelectItem value="PKWTT" class="text-xs">Tetap (PKWTT)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <Label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Mulai Berlaku</Label>
+              <Input type="date" v-model="contractForm.startDate" class="bg-muted/50 border-border/50 rounded-xl [color-scheme:dark]" />
+            </div>
+            <div class="space-y-2" v-if="contractForm.contractType !== 'PKWTT'">
+              <Label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Berakhir Pada</Label>
+              <Input type="date" v-model="contractForm.endDate" class="bg-muted/50 border-border/50 rounded-xl [color-scheme:dark]" />
+            </div>
+          </div>
+
+          <DialogFooter class="pt-4 border-t border-border/40">
+            <Button variant="outline" type="button" @click="isContractModalOpen = false" class="rounded-xl font-bold text-xs h-10">Batal</Button>
+            <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs h-10 px-6" :disabled="isSubmittingContract">
+              <Loader2 v-if="isSubmittingContract" class="w-3.5 h-3.5 mr-2 animate-spin" />
+              Simpan & Arsipkan Lama
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+
   </div>
 </template>

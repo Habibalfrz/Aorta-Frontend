@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   Clock, Search, Download, RefreshCw, Radio,
-  ShieldCheck, AlertTriangle, Moon, FileText, Edit3, Loader2, Sparkles
+  ShieldCheck, AlertTriangle, Moon, Edit3, Loader2, Sparkles
 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
@@ -28,6 +28,9 @@ import {
   simulatePunch
 } from '@/api/hris'
 import api from '@/api/axios'
+
+import AttendanceRawUpload from '../components/AttendanceRawUpload.vue'
+import AttendanceAnomalies from '../components/AttendanceAnomalies.vue'
 
 const isLoaded = ref(false)
 const activeTab = ref('live-logs')
@@ -273,14 +276,30 @@ onMounted(() => {
 
     <!-- Main Tabs -->
     <Tabs v-model="activeTab" class="w-full space-y-6">
-      <TabsList class="bg-muted/50 p-1 rounded-2xl border border-border/50">
-        <TabsTrigger value="live-logs" class="rounded-xl px-5 py-2.5 font-bold text-xs gap-2">
-          <Clock class="w-4 h-4 text-primary" />
-          Log Presensi Real-Time (Live Feed)
+      <TabsList class="bg-transparent p-0 border-b border-border/40 flex flex-wrap gap-6 rounded-none w-full justify-start overflow-x-auto hide-scrollbar">
+        <TabsTrigger
+          value="live-logs"
+          class="rounded-none px-0 py-3 font-semibold text-sm gap-2 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Live Feed
         </TabsTrigger>
-        <TabsTrigger value="monthly-recap" class="rounded-xl px-5 py-2.5 font-bold text-xs gap-2">
-          <FileText class="w-4 h-4 text-emerald-500" />
-          Rekapitulasi Bulanan & Denda HRD
+        <TabsTrigger
+          value="anomalies"
+          class="rounded-none px-0 py-3 font-semibold text-sm gap-2 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Resolusi Anomali
+        </TabsTrigger>
+        <TabsTrigger
+          value="monthly-recap"
+          class="rounded-none px-0 py-3 font-semibold text-sm gap-2 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Rekapitulasi HRD
+        </TabsTrigger>
+        <TabsTrigger
+          value="upload"
+          class="rounded-none px-0 py-3 font-semibold text-sm gap-2 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Upload Raw (CSV)
         </TabsTrigger>
       </TabsList>
 
@@ -577,6 +596,15 @@ onMounted(() => {
             </Table>
           </div>
         </Card>
+      </TabsContent>
+      <!-- TAB 3: ANOMALIES -->
+      <TabsContent value="anomalies" class="space-y-4 outline-none">
+        <AttendanceAnomalies />
+      </TabsContent>
+
+      <!-- TAB 4: RAW UPLOAD -->
+      <TabsContent value="upload" class="space-y-4 outline-none">
+        <AttendanceRawUpload />
       </TabsContent>
     </Tabs>
 

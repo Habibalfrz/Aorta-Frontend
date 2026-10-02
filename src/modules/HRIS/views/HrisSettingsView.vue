@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { Building2, Briefcase, Award, Plus, Trash2, Edit2, ShieldAlert, Clock, Save, Loader2 } from 'lucide-vue-next'
+import { ref, computed, onMounted } from 'vue'
+import { Building2, Briefcase, Award, Plus, Trash2, Edit2, ShieldAlert, Clock, Save, Loader2, AlertTriangle } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table'
@@ -27,10 +30,18 @@ const departments = ref<any[]>([])
 const isLoadingDepts = ref(false)
 const isDeptModalOpen = ref(false)
 const isEditingDept = ref(false)
+const isDeleteDeptOpen = ref(false)
+const deptToDelete = ref<any>(null)
+const isDeletingDept = ref(false)
 const deptForm = ref<{ id?: string; code: string; name: string; parentId: string | null }>({
   code: '',
   name: '',
   parentId: null
+})
+
+const availableParentDepartments = computed(() => {
+  if (!isEditingDept.value) return departments.value
+  return departments.value.filter(d => d.id !== deptForm.value.id)
 })
 
 // State for Job Positions
@@ -38,6 +49,9 @@ const jobPositions = ref<any[]>([])
 const isLoadingJobs = ref(false)
 const isJobModalOpen = ref(false)
 const isEditingJob = ref(false)
+const isDeleteJobOpen = ref(false)
+const jobToDelete = ref<any>(null)
+const isDeletingJob = ref(false)
 const jobForm = ref<{ id?: string; code: string; name: string; description: string }>({
   code: '',
   name: '',
@@ -182,14 +196,14 @@ const saveDept = async () => {
       await updateDepartment(deptForm.value.id, {
         code: deptForm.value.code,
         name: deptForm.value.name,
-        parentId: deptForm.value.parentId
+        parentId: (!deptForm.value.parentId || deptForm.value.parentId === 'null') ? null : deptForm.value.parentId
       })
       toast.success('Departemen berhasil diperbarui')
     } else {
       await createDepartment({
         code: deptForm.value.code,
         name: deptForm.value.name,
-        parentId: deptForm.value.parentId
+        parentId: (!deptForm.value.parentId || deptForm.value.parentId === 'null') ? null : deptForm.value.parentId
       })
       toast.success('Departemen berhasil ditambahkan')
     }
@@ -200,14 +214,24 @@ const saveDept = async () => {
   }
 }
 
-const handleDeleteDept = async (dept: any) => {
-  if (!confirm(`Hapus departemen ${dept.name}?`)) return
+const confirmDeleteDept = (dept: any) => {
+  deptToDelete.value = dept
+  isDeleteDeptOpen.value = true
+}
+
+const executeDeleteDept = async () => {
+  if (!deptToDelete.value) return
+  isDeletingDept.value = true
   try {
-    await deleteDepartment(dept.id)
+    await deleteDepartment(deptToDelete.value.id)
     toast.success('Departemen berhasil dihapus')
+    isDeleteDeptOpen.value = false
     fetchDepts()
   } catch (error: any) {
     toast.error(error.response?.data?.message || 'Gagal menghapus departemen')
+  } finally {
+    isDeletingDept.value = false
+    deptToDelete.value = null
   }
 }
 
@@ -253,14 +277,24 @@ const saveJob = async () => {
   }
 }
 
-const handleDeleteJob = async (job: any) => {
-  if (!confirm(`Hapus jabatan ${job.name}?`)) return
+const confirmDeleteJob = (job: any) => {
+  jobToDelete.value = job
+  isDeleteJobOpen.value = true
+}
+
+const executeDeleteJob = async () => {
+  if (!jobToDelete.value) return
+  isDeletingJob.value = true
   try {
-    await deleteJobPosition(job.id)
+    await deleteJobPosition(jobToDelete.value.id)
     toast.success('Jabatan berhasil dihapus')
+    isDeleteJobOpen.value = false
     fetchJobs()
   } catch (error: any) {
     toast.error(error.response?.data?.message || 'Gagal menghapus jabatan')
+  } finally {
+    isDeletingJob.value = false
+    jobToDelete.value = null
   }
 }
 
@@ -369,7 +403,7 @@ const handleDeleteGrade = async (grade: any) => {
                         <Button variant="ghost" size="sm" class="h-8 w-8 p-0" @click="openEditDept(dept)">
                           <Edit2 class="w-3.5 h-3.5" />
                         </Button>
-                        <Button variant="ghost" size="sm" class="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" @click="handleDeleteDept(dept)">
+                        <Button variant="ghost" size="sm" class="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" @click="confirmDeleteDept(dept)">
                           <Trash2 class="w-3.5 h-3.5" />
                         </Button>
                       </div>
@@ -423,7 +457,7 @@ const handleDeleteGrade = async (grade: any) => {
                         <Button variant="ghost" size="sm" class="h-8 w-8 p-0" @click="openEditJob(job)">
                           <Edit2 class="w-3.5 h-3.5" />
                         </Button>
-                        <Button variant="ghost" size="sm" class="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" @click="handleDeleteJob(job)">
+                        <Button variant="ghost" size="sm" class="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" @click="confirmDeleteJob(job)">
                           <Trash2 class="w-3.5 h-3.5" />
                         </Button>
                       </div>
@@ -628,6 +662,20 @@ const handleDeleteGrade = async (grade: any) => {
             <Label for="deptName" class="text-xs font-bold uppercase text-muted-foreground">Nama Departemen</Label>
             <Input id="deptName" v-model="deptForm.name" placeholder="Misal: Sumber Daya Manusia" class="bg-muted/50 border-border/50 rounded-xl" />
           </div>
+          <div class="space-y-2">
+            <Label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Induk Departemen (Opsional)</Label>
+            <Select v-model="deptForm.parentId">
+              <SelectTrigger class="bg-muted border-border rounded-sm">
+                <SelectValue placeholder="Pilih Induk (Misal: Umum)" />
+              </SelectTrigger>
+              <SelectContent class="rounded-sm border-border shadow-xl bg-card text-foreground z-50">
+                <SelectItem :value="null" class="text-xs font-medium text-muted-foreground italic">Tidak Ada (Departemen Utama)</SelectItem>
+                <SelectItem v-for="d in availableParentDepartments" :key="d.id" :value="d.id" class="text-xs">
+                  {{ d.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <DialogFooter class="pt-4">
             <Button variant="outline" type="button" @click="isDeptModalOpen = false" class="rounded-xl font-bold text-xs h-10">Batal</Button>
             <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs h-10 px-6">Simpan</Button>
@@ -689,6 +737,49 @@ const handleDeleteGrade = async (grade: any) => {
             <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs h-10 px-6">Simpan</Button>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+
+    <!-- DELETE CONFIRMATION DIALOGS -->
+    <Dialog :open="isDeleteDeptOpen" @update:open="isDeleteDeptOpen = $event">
+      <DialogContent class="sm:max-w-[420px] bg-card border-border/60 rounded-3xl p-0 overflow-hidden shadow-2xl">
+        <div class="p-6 pt-8 text-center space-y-4">
+          <div class="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-2">
+            <AlertTriangle class="w-8 h-8 text-destructive" />
+          </div>
+          <DialogTitle class="text-xl font-bold text-foreground">Hapus Departemen?</DialogTitle>
+          <DialogDescription class="text-sm text-muted-foreground px-4">
+            Apakah Anda yakin ingin menghapus departemen <span class="font-bold text-foreground">{{ deptToDelete?.name }}</span>? Tindakan ini tidak dapat dibatalkan.
+          </DialogDescription>
+        </div>
+        <div class="p-4 bg-muted/30 border-t border-border/50 flex justify-end gap-2">
+          <Button variant="outline" @click="isDeleteDeptOpen = false" :disabled="isDeletingDept" class="rounded-xl font-bold text-xs">Batal</Button>
+          <Button variant="destructive" @click="executeDeleteDept" :disabled="isDeletingDept" class="rounded-xl font-bold text-xs px-6">
+            <Loader2 v-if="isDeletingDept" class="w-4 h-4 mr-2 animate-spin" />
+            Hapus Departemen
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog :open="isDeleteJobOpen" @update:open="isDeleteJobOpen = $event">
+      <DialogContent class="sm:max-w-[420px] bg-card border-border/60 rounded-3xl p-0 overflow-hidden shadow-2xl">
+        <div class="p-6 pt-8 text-center space-y-4">
+          <div class="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-2">
+            <AlertTriangle class="w-8 h-8 text-destructive" />
+          </div>
+          <DialogTitle class="text-xl font-bold text-foreground">Hapus Jabatan?</DialogTitle>
+          <DialogDescription class="text-sm text-muted-foreground px-4">
+            Apakah Anda yakin ingin menghapus jabatan <span class="font-bold text-foreground">{{ jobToDelete?.name }}</span>? Tindakan ini tidak dapat dibatalkan.
+          </DialogDescription>
+        </div>
+        <div class="p-4 bg-muted/30 border-t border-border/50 flex justify-end gap-2">
+          <Button variant="outline" @click="isDeleteJobOpen = false" :disabled="isDeletingJob" class="rounded-xl font-bold text-xs">Batal</Button>
+          <Button variant="destructive" @click="executeDeleteJob" :disabled="isDeletingJob" class="rounded-xl font-bold text-xs px-6">
+            <Loader2 v-if="isDeletingJob" class="w-4 h-4 mr-2 animate-spin" />
+            Hapus Jabatan
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   </div>

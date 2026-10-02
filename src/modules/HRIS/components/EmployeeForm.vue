@@ -34,7 +34,8 @@ const emit = defineEmits<{
 
 const form = useForm(
   z.object({
-    employeeNumber: z.string().min(1, 'NIK wajib diisi'),
+    identityNumber: z.string().min(1, 'No KTP / NIK wajib diisi'),
+    employeeNumber: z.string().min(1, 'NIP (Nomor Pegawai) wajib diisi'),
     fullName: z.string().min(1, 'Nama lengkap wajib diisi'),
     email: z.string().email('Format email tidak valid').optional().or(z.literal('')),
     dateOfBirth: z.string().min(1, 'Tanggal lahir wajib diisi').refine((val) => {
@@ -42,15 +43,22 @@ const form = useForm(
       return !isNaN(date.getTime()) && date < new Date()
     }, 'Tanggal lahir tidak valid atau di masa depan'),
     gender: z.enum(['L', 'P']),
+    professionCategory: z.string().min(1, 'Kategori profesi wajib diisi'),
     fingerprintPin: z.string().optional(),
+    initialContractType: z.string().optional(),
+    initialStartDate: z.string().optional(),
   }),
   {
+    identityNumber: '',
     employeeNumber: '',
     fullName: '',
     email: '',
     dateOfBirth: '',
     gender: 'L' as 'L' | 'P',
-    fingerprintPin: ''
+    professionCategory: 'Non-Medis',
+    fingerprintPin: '',
+    initialContractType: '',
+    initialStartDate: ''
   }
 )
 
@@ -59,12 +67,16 @@ const handleOpenChange = (val: boolean) => {
     form.clearErrors()
     // Reset form for next use
     form.data.value = {
+      identityNumber: '',
       employeeNumber: '',
       fullName: '',
       email: '',
       dateOfBirth: '',
       gender: 'L',
-      fingerprintPin: ''
+      professionCategory: 'Non-Medis',
+      fingerprintPin: '',
+      initialContractType: '',
+      initialStartDate: ''
     }
   }
   emit('update:open', val)
@@ -113,7 +125,19 @@ const onSubmit = async () => {
         </div>
 
         <div class="space-y-2">
-          <Label for="employeeNumber" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nomor Induk Kepegawaian (NIK) <span class="text-destructive">*</span></Label>
+          <Label for="identityNumber" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">No. KTP / NIK Penduduk <span class="text-destructive">*</span></Label>
+          <Input
+            id="identityNumber"
+            v-model="form.data.value.identityNumber"
+            placeholder="16 digit NIK KTP"
+            class="bg-muted/50 border-border/50 rounded-xl"
+            :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.identityNumber }"
+          />
+          <p v-if="form.errors.value.identityNumber" class="text-xs font-bold text-destructive">{{ form.errors.value.identityNumber }}</p>
+        </div>
+
+        <div class="space-y-2">
+          <Label for="employeeNumber" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nomor Induk Pegawai (NIP) <span class="text-destructive">*</span></Label>
           <Input
             id="employeeNumber"
             v-model="form.data.value.employeeNumber"
@@ -168,13 +192,29 @@ const onSubmit = async () => {
               <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl" :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.gender }">
                 <SelectValue placeholder="Pilih jenis kelamin" />
               </SelectTrigger>
-              <SelectContent class="rounded-xl border-border/60 shadow-lg bg-popover text-popover-foreground">
+              <SelectContent class="rounded-xl border-border shadow-2xl bg-white dark:bg-zinc-950 text-foreground">
                 <SelectItem value="L" class="rounded-lg cursor-pointer text-xs font-medium">Laki-laki</SelectItem>
                 <SelectItem value="P" class="rounded-lg cursor-pointer text-xs font-medium">Perempuan</SelectItem>
               </SelectContent>
             </Select>
             <p v-if="form.errors.value.gender" class="text-xs font-bold text-destructive">{{ form.errors.value.gender }}</p>
           </div>
+        </div>
+
+        <div class="space-y-2">
+          <Label for="professionCategory" class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Kategori Profesi <span class="text-destructive">*</span></Label>
+          <Select v-model="form.data.value.professionCategory">
+            <SelectTrigger class="bg-muted/50 border-border/50 rounded-xl" :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.professionCategory }">
+              <SelectValue placeholder="Pilih Kategori Profesi" />
+            </SelectTrigger>
+            <SelectContent class="rounded-xl border-border bg-white dark:bg-zinc-950 text-foreground shadow-2xl">
+              <SelectItem value="Medis" class="rounded-lg cursor-pointer text-xs font-medium">Medis (Dokter)</SelectItem>
+              <SelectItem value="Keperawatan" class="rounded-lg cursor-pointer text-xs font-medium">Keperawatan & Kebidanan</SelectItem>
+              <SelectItem value="Penunjang Medis" class="rounded-lg cursor-pointer text-xs font-medium">Tenaga Kesehatan Lainnya (Apoteker, Lab)</SelectItem>
+              <SelectItem value="Non-Kesehatan" class="rounded-lg cursor-pointer text-xs font-medium">Tenaga Non-Kesehatan (Manajemen, Umum)</SelectItem>
+            </SelectContent>
+          </Select>
+          <p v-if="form.errors.value.professionCategory" class="text-xs font-bold text-destructive">{{ form.errors.value.professionCategory }}</p>
         </div>
 
         <div class="space-y-2">

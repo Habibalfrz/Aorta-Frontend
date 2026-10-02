@@ -32,6 +32,9 @@ dist-ssr/
 
 # Claude Code
 .claude/
+.superpowers/
+docs/superpowers/
+docs/
 
 # Ignore local configs
 *.local

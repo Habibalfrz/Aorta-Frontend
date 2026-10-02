@@ -1,0 +1,39 @@
+name: Deploy Frontend Vue
+
+on:
+  push:
+    branches:
+      - main
+    # Script hanya jalan kalau ada perubahan di source code
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'vite.config.ts'
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Environment Variables
+      run: |
+        # Membuat file .env.production
+        # Gunakan relative path '/api' karena Nginx akan proxy request ini ke Backend
+        echo "VITE_API_BASE_URL=/api" > .env.production
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build Production
+      run: npm run build
+
+    - name: Deploy to Nginx-Proxy (LXC 10.10.10.20)
+      run: |
+        # Mengirim folder 'dist' ke nginx-proxy
+        # Opsi --delete akan menghapus file lama di server yang sudah tidak ada di build baru
+        rsync -avz --delete ./dist/ root@10.10.10.20:/var/www/aorta-frontend/

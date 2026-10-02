@@ -38,6 +38,7 @@ const activeTab = ref('live-logs')
 // --- LIVE LOGS STATE ---
 const logs = ref<any[]>([])
 const isLoadingLogs = ref(true)
+const isTriggeringCron = ref(false)
 const searchQuery = ref('')
 
 // Simulation modal state
@@ -82,6 +83,21 @@ const months = [
 ]
 
 const years = [2025, 2026, 2027]
+
+// Trigger Cronjob
+const triggerCronjob = async () => {
+  isTriggeringCron.value = true
+  try {
+    const res = await api.post('/hris/attendance/trigger-processing')
+    toast.success(res.data?.message || 'Cronjob berhasil dipicu')
+    fetchLogs()
+  } catch (error: any) {
+    console.error('Failed to trigger cronjob:', error)
+    toast.error(error.response?.data?.message || 'Gagal memicu cronjob absensi')
+  } finally {
+    isTriggeringCron.value = false
+  }
+}
 
 // Fetch Live Logs
 const fetchLogs = async () => {
@@ -316,6 +332,10 @@ onMounted(() => {
             </div>
 
             <div class="flex items-center gap-2">
+              <Button variant="outline" class="rounded-xl font-bold text-xs h-10 gap-2 border-border/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 hover:text-amber-700" @click="triggerCronjob" :disabled="isTriggeringCron">
+                <Sparkles class="w-3.5 h-3.5" :class="{ 'animate-spin': isTriggeringCron }" />
+                Trigger Cron
+              </Button>
               <Button variant="outline" class="rounded-xl font-bold text-xs h-10 gap-2 border-border/50" @click="fetchLogs" :disabled="isLoadingLogs">
                 <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': isLoadingLogs }" />
                 Refresh Feed

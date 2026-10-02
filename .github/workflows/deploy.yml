@@ -24,7 +24,7 @@ jobs:
       run: |
         # Membuat file .env.production
         # Gunakan relative path '/api' karena Nginx akan proxy request ini ke Backend
-        echo "VITE_API_BASE_URL=/api" > .env.production
+        echo "VITE_API_BASE_URL=/" > .env.production
 
     - name: Install Dependencies
       run: npm install

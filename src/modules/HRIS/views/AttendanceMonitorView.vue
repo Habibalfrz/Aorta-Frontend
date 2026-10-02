@@ -118,8 +118,7 @@ const filteredLogs = computed(() => {
   return logs.value.filter(log =>
     log.employeeName?.toLowerCase().includes(q) ||
     log.employeeNik?.toLowerCase().includes(q) ||
-    log.departmentName?.toLowerCase().includes(q) ||
-    log.shiftName?.toLowerCase().includes(q)
+    log.machineSn?.toLowerCase().includes(q)
   )
 })
 
@@ -328,17 +327,16 @@ onMounted(() => {
             <Table>
               <TableHeader class="bg-muted/30 border-b border-border/50">
                 <TableRow>
-                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Tanggal</TableHead>
+                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Waktu (Log Mentah)</TableHead>
                   <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Pegawai</TableHead>
-                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Shift Kerja</TableHead>
-                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Jam Masuk (Clock In)</TableHead>
-                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Jam Pulang (Clock Out)</TableHead>
-                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Status & Denda / Lembur</TableHead>
+                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Mesin</TableHead>
+                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Tipe Absen</TableHead>
+                  <TableHead class="font-bold text-muted-foreground uppercase tracking-widest text-[10px] px-6 py-4">Status Processed</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow v-if="isLoadingLogs">
-                  <TableCell colspan="6" class="h-28 text-center text-muted-foreground text-sm font-medium">
+                  <TableCell colspan="5" class="h-28 text-center text-muted-foreground text-sm font-medium">
                     <Loader2 class="w-5 h-5 mx-auto animate-spin mb-2 text-primary" />
                     Memuat log presensi real-time...
                   </TableCell>
@@ -346,51 +344,31 @@ onMounted(() => {
                 <template v-else>
                   <TableRow v-for="log in filteredLogs" :key="log.id" class="hover:bg-muted/20 transition-colors">
                     <TableCell class="font-mono text-xs font-semibold text-foreground px-6 py-4">
-                      {{ log.date }}
+                      {{ log.timestamp }}
                     </TableCell>
                     <TableCell class="px-6 py-4">
                       <p class="font-bold text-foreground text-sm">{{ log.employeeName }}</p>
-                      <p class="text-xs text-muted-foreground font-mono">{{ log.employeeNik }} &bull; {{ log.departmentName }}</p>
+                      <p class="text-xs text-muted-foreground font-mono">NIK: {{ log.employeeNik }}</p>
                     </TableCell>
-                    <TableCell class="text-xs font-semibold text-muted-foreground px-6 py-4">
-                      {{ log.shiftName }}
+                    <TableCell class="text-xs font-semibold text-muted-foreground px-6 py-4 font-mono">
+                      {{ log.machineSn }}
                     </TableCell>
-                    <TableCell class="px-6 py-4 font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      {{ log.clockInTime }}
-                    </TableCell>
-                    <TableCell class="px-6 py-4 font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
-                      {{ log.clockOutTime }}
+                    <TableCell class="px-6 py-4 font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
+                      Tipe: {{ log.attendanceType }}
                     </TableCell>
                     <TableCell class="px-6 py-4">
-                      <div class="flex flex-col gap-1 items-start">
-                        <!-- Tepat Waktu -->
-                        <Badge v-if="log.status === 'Present' && (!log.lateMinutes || log.lateMinutes === 0)" class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[11px] font-bold">
-                          <ShieldCheck class="w-3 h-3 mr-1" />
-                          Tepat Waktu (Denda Rp 0)
-                        </Badge>
-
-                        <!-- Terlambat -->
-                        <Badge v-else-if="log.status === 'Late' || log.lateMinutes > 0" class="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 text-[11px] font-bold">
-                          <AlertTriangle class="w-3 h-3 mr-1" />
-                          Telat {{ log.lateMinutes }} mnt
-                          <span v-if="log.latePenaltyAmount > 0" class="ml-1 font-mono">(-Rp {{ Number(log.latePenaltyAmount).toLocaleString('id-ID') }})</span>
-                        </Badge>
-
-                        <!-- Missing Check-Out -->
-                        <Badge v-else-if="log.status === 'MissingCheckOut'" class="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[11px] font-bold">
-                          <Moon class="w-3 h-3 mr-1" />
-                          Lupa Tap Pulang
-                        </Badge>
-
-                        <!-- Lembur -->
-                        <span v-if="log.overtimeMinutes > 0" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 font-mono">
-                          + Lembur {{ log.overtimeMinutes }} mnt (Rp {{ Number(log.overtimeAmount).toLocaleString('id-ID') }})
-                        </span>
-                      </div>
+                      <Badge v-if="log.isProcessed" class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[11px] font-bold">
+                        <ShieldCheck class="w-3 h-3 mr-1" />
+                        Processed
+                      </Badge>
+                      <Badge v-else class="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[11px] font-bold">
+                        <AlertTriangle class="w-3 h-3 mr-1" />
+                        Pending
+                      </Badge>
                     </TableCell>
                   </TableRow>
                   <TableRow v-if="filteredLogs.length === 0">
-                    <TableCell colspan="6" class="h-28 text-center text-muted-foreground text-sm font-medium">
+                    <TableCell colspan="5" class="h-28 text-center text-muted-foreground text-sm font-medium">
                       Tidak ada data log presensi yang cocok dengan pencarian.
                     </TableCell>
                   </TableRow>

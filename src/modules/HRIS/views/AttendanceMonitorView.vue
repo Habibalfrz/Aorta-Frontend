@@ -88,7 +88,7 @@ const years = [2025, 2026, 2027]
 const triggerCronjob = async () => {
   isTriggeringCron.value = true
   try {
-    const res = await api.post('/hris/attendance/trigger-processing')
+    const res = await api.post('/api/hris/attendance/trigger-processing')
     toast.success(res.data?.message || 'Cronjob berhasil dipicu')
     fetchLogs()
   } catch (error: any) {

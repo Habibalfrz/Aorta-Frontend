@@ -86,9 +86,11 @@ const years = [2025, 2026, 2027]
 
 // Trigger Cronjob
 const triggerCronjob = async () => {
+  console.log('triggerCronjob clicked!')
   isTriggeringCron.value = true
   try {
     const res = await api.post('/api/hris/attendance/trigger-processing')
+    console.log('Trigger result:', res)
     toast.success(res.data?.message || 'Cronjob berhasil dipicu')
     fetchLogs()
   } catch (error: any) {

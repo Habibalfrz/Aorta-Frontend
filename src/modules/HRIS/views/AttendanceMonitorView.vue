@@ -344,7 +344,7 @@ onMounted(() => {
                 <template v-else>
                   <TableRow v-for="log in filteredLogs" :key="log.id" class="hover:bg-muted/20 transition-colors">
                     <TableCell class="font-mono text-xs font-semibold text-foreground px-6 py-4">
-                      {{ log.timestamp }}
+                      {{ new Date(log.timestamp).toLocaleString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}
                     </TableCell>
                     <TableCell class="px-6 py-4">
                       <p class="font-bold text-foreground text-sm">{{ log.employeeName }}</p>

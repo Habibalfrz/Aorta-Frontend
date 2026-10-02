@@ -27,6 +27,10 @@ jobs:
         # Gunakan relative path '/api' karena Nginx akan proxy request ini ke Backend
         echo "VITE_API_BASE_URL=http://aorta.andini.net" > .env.production
 
+    - name: Clean Workspace
+      run: |
+        rm -rf node_modules dist *.tsbuildinfo
+
     - name: Install Dependencies
       run: npm install
 

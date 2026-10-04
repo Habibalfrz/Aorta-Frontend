@@ -356,7 +356,7 @@ export async function getUnlinkedMachineUsers() {
   return response.data
 }
 
-export async function linkMachineUser(machineUserId: string, employeeId: string) {
+export async function linkMachineUser(machineUserId: string | null, employeeId: string) {
   const response = await api.post('/api/hris/zkteco/link', { machineUserId, employeeId })
   return response.data
 }
@@ -364,6 +364,16 @@ export async function linkMachineUser(machineUserId: string, employeeId: string)
 export async function getAllMachineUsers() {
   const response = await api.get('/api/hris/zkteco/users')
   return response.data.data || []
+}
+
+export async function updateZkTecoPrivilege(id: string, role: string, ipAddress: string) {
+  const response = await api.put(`/api/hris/zkteco/users/${id}/privilege`, { role, ipAddress })
+  return response.data
+}
+
+export async function backupBiometrics(ipAddress: string) {
+  const response = await api.post('/api/hris/zkteco/backup', { ipAddress })
+  return response.data
 }
 
 

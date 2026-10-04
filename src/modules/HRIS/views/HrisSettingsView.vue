@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { Building2, Briefcase, Award, Plus, Trash2, Edit2, ShieldAlert, Clock, Save, Loader2, AlertTriangle } from 'lucide-vue-next'
+import { ref, computed, onMounted, watch } from 'vue'
+import { Building2, Briefcase, Award, Plus, Trash2, Edit2, ShieldAlert, Clock, Save, Loader2, AlertTriangle, Fingerprint, Link2, Unlink, Search } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,7 +19,8 @@ import {
   getDepartments, createDepartment, updateDepartment, deleteDepartment,
   getJobPositions, createJobPosition, updateJobPosition, deleteJobPosition,
   getGrades, createGrade, deleteGrade,
-  getAttendancePolicy, updateAttendancePolicy
+  getAttendancePolicy, updateAttendancePolicy,
+  syncZkTecoUsers, getAllMachineUsers, updateZkTecoPrivilege, backupBiometrics
 } from '@/api/hris'
 
 const isLoaded = ref(false)
@@ -85,6 +86,39 @@ const policyForm = ref({
   absentPenalty: 150000,
   loyaltyOvertimeMinutes: 60,
   defaultOvertimeRatePerHour: 20000
+})
+
+// State for ZKTeco Machine
+const machineIpAddress = ref('')
+const isSyncingMachine = ref(false)
+const isBackingUp = ref(false)
+const machineSyncMessage = ref('')
+const machineUsers = ref<any[]>([])
+const isLoadingMachineUsers = ref(false)
+
+const searchQuery = ref('')
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+const filteredMachineUsers = computed(() => {
+  if (!searchQuery.value) return machineUsers.value
+  const query = searchQuery.value.toLowerCase()
+  return machineUsers.value.filter(user =>
+    (user.machineName && user.machineName.toLowerCase().includes(query)) ||
+    (user.machinePin && user.machinePin.toLowerCase().includes(query))
+  )
+})
+
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+
+const totalPages = computed(() => Math.ceil(filteredMachineUsers.value.length / itemsPerPage.value))
+
+const paginatedMachineUsers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredMachineUsers.value.slice(start, end)
 })
 
 // Fetch Handlers
@@ -162,11 +196,60 @@ const handleSavePolicy = async () => {
   }
 }
 
+const fetchMachineUsers = async () => {
+  isLoadingMachineUsers.value = true
+  try {
+    machineUsers.value = await getAllMachineUsers()
+    currentPage.value = 1
+  } catch (error) {
+    console.error("Failed to load machine users", error)
+  } finally {
+    isLoadingMachineUsers.value = false
+  }
+}
+
+const triggerSync = async () => {
+  try {
+    isSyncingMachine.value = true
+    await syncZkTecoUsers(machineIpAddress.value)
+    machineSyncMessage.value = "Tugas sinkronisasi antrean terkirim ke background. Refresh tabel ini dalam beberapa saat."
+    toast.success("Job sinkronisasi berjalan di server.")
+  } catch (error) {
+    machineSyncMessage.value = "Gagal memicu sinkronisasi."
+    toast.error("Gagal melakukan sinkronisasi.")
+  } finally {
+    isSyncingMachine.value = false
+  }
+}
+
+const triggerBackup = async () => {
+  try {
+    isBackingUp.value = true
+    await backupBiometrics(machineIpAddress.value)
+    toast.success("Job backup biometrik terkirim ke background server.")
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "Gagal memicu backup biometrik.")
+  } finally {
+    isBackingUp.value = false
+  }
+}
+
+const handleRoleChange = async (userId: string, newRole: string) => {
+  try {
+    await updateZkTecoPrivilege(userId, newRole, machineIpAddress.value)
+    toast.success(`Hak akses berhasil diubah menjadi ${newRole} pada mesin.`)
+    fetchMachineUsers()
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "Gagal mengubah hak akses mesin. Mesin mungkin offline.")
+  }
+}
+
 onMounted(() => {
   fetchDepts()
   fetchJobs()
   fetchGradesList()
   fetchPolicy()
+  fetchMachineUsers()
   requestAnimationFrame(() => {
     isLoaded.value = true
   })
@@ -362,6 +445,10 @@ const handleDeleteGrade = async (grade: any) => {
         <TabsTrigger value="policy" class="rounded-xl px-4 py-2 font-bold text-xs gap-2">
           <ShieldAlert class="w-4 h-4 text-amber-500" />
           Kebijakan Presensi & Denda
+        </TabsTrigger>
+        <TabsTrigger value="machine" class="rounded-xl px-4 py-2 font-bold text-xs gap-2">
+          <Fingerprint class="w-4 h-4 text-primary" />
+          Machine
         </TabsTrigger>
       </TabsList>
 
@@ -639,6 +726,138 @@ const handleDeleteGrade = async (grade: any) => {
                 <p class="text-[10px] text-muted-foreground">
                   Upah kompensasi lembur efektif yang dihitung per jam kelebihan kerja di atas batas loyalitas.
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </TabsContent>
+
+      <!-- MACHINE TAB -->
+      <TabsContent value="machine" class="space-y-6 outline-none">
+        <div class="space-y-6">
+          <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow glass-panel border border-border/50">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <Fingerprint class="w-5 h-5" />
+              </div>
+              <div>
+                <h2 class="text-xl font-bold tracking-tight">Pengaturan Mesin Sidik Jari</h2>
+                <p class="text-xs text-muted-foreground">Tarik data pegawai dan template sidik jari dari mesin ke server AORTA</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4 items-center mb-2">
+              <div class="w-full max-w-sm space-y-1">
+                <label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">IP Address Mesin TCP/IP</label>
+                <Input v-model="machineIpAddress" type="text" class="w-full font-bold text-sm bg-muted/50" placeholder="Contoh: 192.168.1.201" />
+              </div>
+              <div class="pt-5 flex gap-2">
+                <Button @click="triggerSync" :disabled="isSyncingMachine" class="bg-primary text-white px-6 py-2.5 rounded-xl hover:bg-primary/90 font-bold text-sm disabled:opacity-50 flex items-center gap-2 shadow-sm">
+                  <Loader2 v-if="isSyncingMachine" class="w-4 h-4 animate-spin" />
+                  <Fingerprint v-else class="w-4 h-4" />
+                  {{ isSyncingMachine ? 'Mengeksekusi...' : 'Tarik Data Pengguna' }}
+                </Button>
+                <Button @click="triggerBackup" :disabled="isBackingUp" variant="outline" class="px-6 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center gap-2 shadow-sm">
+                  <Loader2 v-if="isBackingUp" class="w-4 h-4 animate-spin" />
+                  Backup Biometrik
+                </Button>
+              </div>
+            </div>
+            <p v-if="machineSyncMessage" class="mt-2 text-xs font-medium text-amber-600 dark:text-amber-500">{{ machineSyncMessage }}</p>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow glass-panel border border-border/50 overflow-hidden">
+            <div class="p-4 border-b border-border/50 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-muted/20">
+              <h3 class="font-bold text-sm">Data Pengguna di Mesin (Staging)</h3>
+              <div class="flex items-center gap-3">
+                <div class="relative w-full sm:w-64">
+                  <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="Cari PIN atau Nama..."
+                    class="pl-9 h-9 text-xs font-medium bg-background"
+                  />
+                </div>
+                <button @click="fetchMachineUsers" class="text-xs text-primary font-bold hover:underline shrink-0">Refresh Tabel</button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <Table>
+                <TableHeader class="bg-muted/30">
+                  <TableRow>
+                    <TableHead class="w-[60px] font-bold text-xs uppercase text-muted-foreground px-6 py-4">No.</TableHead>
+                    <TableHead class="font-bold text-xs uppercase text-muted-foreground px-6 py-4">PIN Mesin</TableHead>
+                    <TableHead class="font-bold text-xs uppercase text-muted-foreground px-6 py-4">Nama di Mesin</TableHead>
+                    <TableHead class="font-bold text-xs uppercase text-muted-foreground px-6 py-4">Role (Privilege)</TableHead>
+                    <TableHead class="font-bold text-xs uppercase text-muted-foreground px-6 py-4">Terakhir Ditarik</TableHead>
+                    <TableHead class="font-bold text-xs uppercase text-muted-foreground px-6 py-4 text-right">Status Penyatuan</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow v-if="isLoadingMachineUsers">
+                    <TableCell colspan="6" class="h-24 text-center text-muted-foreground text-sm font-medium">Memuat data dari database staging...</TableCell>
+                  </TableRow>
+                  <TableRow v-else-if="filteredMachineUsers.length === 0">
+                    <TableCell colspan="6" class="h-24 text-center text-muted-foreground text-sm font-medium">
+                      {{ searchQuery ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data yang ditarik dari mesin. Klik tombol "Tarik Data" di atas.' }}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow v-for="(user, index) in paginatedMachineUsers" :key="user.id" class="hover:bg-accent/40">
+                    <TableCell class="font-medium text-xs px-6 py-4">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</TableCell>
+                    <TableCell class="font-mono text-xs font-bold text-muted-foreground px-6 py-4">{{ user.machinePin }}</TableCell>
+                    <TableCell class="font-bold text-sm text-foreground px-6 py-4">{{ user.machineName }}</TableCell>
+                    <TableCell class="px-6 py-4">
+                      <Select :model-value="user.privilegeRole || 'Normal'" @update:model-value="(val) => handleRoleChange(user.id, val)">
+                        <SelectTrigger class="w-[120px] h-8 text-[10px] font-bold uppercase rounded-full border-none" :class="user.privilegeRole === 'Superadmin' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Normal" class="text-xs font-bold">Normal</SelectItem>
+                          <SelectItem value="Superadmin" class="text-xs font-bold text-amber-600">Superadmin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>>
+                    <TableCell class="text-xs text-muted-foreground px-6 py-4">{{ user.lastSyncAt ? new Date(user.lastSyncAt).toLocaleString() : '-' }}</TableCell>
+                    <TableCell class="text-right px-6 py-4">
+                      <div v-if="user.linkedEmployeeId" class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-500 font-semibold text-xs bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md">
+                        <Link2 class="w-3 h-3" /> Ditautkan
+                      </div>
+                      <div v-else class="inline-flex items-center gap-1.5 text-muted-foreground font-semibold text-xs bg-muted/50 px-2 py-1 rounded-md">
+                        <Unlink class="w-3 h-3" /> Menganggur
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+
+            <div class="p-4 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 bg-muted/10">
+              <div class="text-xs text-muted-foreground font-medium">
+                Menampilkan {{ filteredMachineUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0 }} -
+                {{ Math.min(currentPage * itemsPerPage, filteredMachineUsers.length) }} dari {{ filteredMachineUsers.length }} data
+              </div>
+              <div class="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  :disabled="currentPage === 1"
+                  @click="currentPage--"
+                >
+                  Sebelumnya
+                </Button>
+                <span class="text-xs font-medium px-2">
+                  Halaman {{ totalPages > 0 ? currentPage : 0 }} dari {{ totalPages }}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  :disabled="currentPage === totalPages || totalPages === 0"
+                  @click="currentPage++"
+                >
+                  Selanjutnya
+                </Button>
               </div>
             </div>
           </div>

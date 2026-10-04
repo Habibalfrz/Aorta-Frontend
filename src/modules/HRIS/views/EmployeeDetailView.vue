@@ -21,10 +21,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { ArrowLeft, CalendarClock, ShieldCheck, Users, Loader2 } from 'lucide-vue-next'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ArrowLeft, CalendarClock, ShieldCheck, Users, Loader2, UserSquare } from 'lucide-vue-next'
 import api from '@/api/axios'
 import { toast } from 'vue-sonner'
-import { updateEmployee, getDepartments, getJobPositions, getEmployeeContracts, createEmployeeContract, getEmployeeDocuments } from '@/api/hris'
+import { updateEmployee, getDepartments, getJobPositions, getEmployeeContracts, createEmployeeContract, getEmployeeDocuments, getUnlinkedMachineUsers, linkMachineUser } from '@/api/hris'
 
 // Import lazy-loaded child components for the tabs
 import EmployeeBasicInfoTab from '../components/EmployeeBasicInfoTab.vue'
@@ -71,6 +72,19 @@ const editForm = ref<{
   status: 'Aktif',
   professionCategory: 'Non-Kesehatan',
   fingerprintPin: ''
+})
+
+const unlinkedUsers = ref<any[]>([])
+const selectedMachineUserId = ref<string | null>(null)
+const searchQuery = ref('')
+
+const filteredUnlinkedUsers = computed(() => {
+  if (!searchQuery.value) return unlinkedUsers.value
+  const q = searchQuery.value.toLowerCase()
+  return unlinkedUsers.value.filter(u =>
+    (u.machineName || '').toLowerCase().includes(q) ||
+    (u.machinePin || '').toLowerCase().includes(q)
+  )
 })
 
 const fetchEmployeeDetail = async () => {
@@ -171,6 +185,20 @@ const openEditModal = () => {
     jobPositionId: employeeData.value.jobPositionId,
     fingerprintPin: employeeData.value.fingerprintPin || ''
   }
+  selectedMachineUserId.value = employeeData.value.linkedMachineUser?.id || null
+  searchQuery.value = ''
+
+  getUnlinkedMachineUsers().then(data => {
+    unlinkedUsers.value = data
+    // Append the currently linked machine user so it appears in the list
+    if (employeeData.value.linkedMachineUser) {
+      const alreadyExists = unlinkedUsers.value.some(u => u.id === employeeData.value.linkedMachineUser.id)
+      if (!alreadyExists) {
+        unlinkedUsers.value.push(employeeData.value.linkedMachineUser)
+      }
+    }
+  }).catch(e => console.error(e))
+
   isEditOpen.value = true
 }
 
@@ -195,6 +223,15 @@ const handleSaveEdit = async () => {
       jobPositionId: editForm.value.jobPositionId,
       fingerprintPin: editForm.value.fingerprintPin || undefined
     })
+
+    if (selectedMachineUserId.value !== undefined) {
+      try {
+        await linkMachineUser(selectedMachineUserId.value, editForm.value.id)
+      } catch(e) {
+        console.error('Failed to link machine user', e)
+      }
+    }
+
     toast.success('Data pegawai berhasil diperbarui')
     isEditOpen.value = false
     fetchEmployeeDetail()
@@ -509,6 +546,58 @@ const goBack = () => {
               placeholder="Contoh: 101 (Default: mengikuti NIK)"
               class="bg-muted border-border rounded-sm font-mono"
             />
+          </div>
+
+          <div class="mt-4 p-4 border rounded-xl bg-gray-50 dark:bg-gray-900/50">
+            <Label class="block text-sm font-bold mb-2">Tautkan dengan Data Mesin (ZKTeco) Baru</Label>
+            <Popover>
+              <PopoverTrigger as-child>
+                <Button
+                  variant="outline"
+                  type="button"
+                  role="combobox"
+                  class="w-full justify-between font-normal bg-white dark:bg-zinc-950 border-border rounded-lg text-sm h-10 px-3"
+                  :class="!selectedMachineUserId ? 'text-muted-foreground' : ''"
+                >
+                  {{ selectedMachineUserId
+                      ? `PIN: ${unlinkedUsers.find(u => u.id === selectedMachineUserId)?.machinePin} - ${unlinkedUsers.find(u => u.id === selectedMachineUserId)?.machineName}`
+                      : '-- Pilih Jika Ingin Menautkan ID Mesin Baru --' }}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 h-4 w-4 shrink-0 opacity-50"><path d="m6 9 6 6 6-6"/></svg>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent class="w-[400px] p-0 shadow-xl border border-border rounded-xl z-50 bg-white dark:bg-zinc-950 overflow-hidden">
+                <div class="p-2 border-b">
+                  <Input
+                    v-model="searchQuery"
+                    placeholder="Cari nama atau PIN..."
+                    class="h-9 border-none focus-visible:ring-0 shadow-none bg-muted/50 rounded-lg text-sm"
+                  />
+                </div>
+                <div class="max-h-[200px] overflow-y-auto p-1">
+                  <div v-if="filteredUnlinkedUsers.length === 0" class="p-4 text-center text-xs text-muted-foreground">Data tidak ditemukan.</div>
+
+                  <div
+                    v-if="!searchQuery"
+                    class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm cursor-pointer hover:bg-muted"
+                    @click="selectedMachineUserId = null"
+                  >
+                     <span class="font-medium text-muted-foreground">-- Tidak Ditautkan --</span>
+                  </div>
+
+                  <div
+                    v-for="user in filteredUnlinkedUsers"
+                    :key="user.id"
+                    class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm cursor-pointer hover:bg-muted"
+                    :class="{ 'bg-primary/10 text-primary font-bold': selectedMachineUserId === user.id }"
+                    @click="selectedMachineUserId = user.id"
+                  >
+                    <span class="font-mono text-xs w-12 shrink-0">PIN:{{ user.machinePin }}</span>
+                    <span class="text-muted-foreground shrink-0">-</span>
+                    <span class="font-medium truncate">{{ user.machineName }}</span>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <DialogFooter class="pt-4">

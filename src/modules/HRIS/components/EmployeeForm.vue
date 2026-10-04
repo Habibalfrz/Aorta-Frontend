@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { useForm } from '@/composables/useForm'
 import { createEmployee, getUnlinkedMachineUsers, linkMachineUser } from '@/api/hris'
 import { toast } from 'vue-sonner'
-import { onMounted, ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 import {
   Dialog,
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 const props = defineProps<{
   open: boolean
@@ -32,6 +33,36 @@ const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
   (e: 'success', id: string): void
 }>()
+
+const form = useForm(
+  z.object({
+    identityNumber: z.string().min(1, 'No KTP / NIK wajib diisi'),
+    employeeNumber: z.string().min(1, 'NIP (Nomor Pegawai) wajib diisi'),
+    fullName: z.string().min(1, 'Nama lengkap wajib diisi'),
+    email: z.string().email('Format email tidak valid').optional().or(z.literal('')),
+    dateOfBirth: z.string().min(1, 'Tanggal lahir wajib diisi').refine((val) => {
+      const date = new Date(val)
+      return !isNaN(date.getTime()) && date < new Date()
+    }, 'Tanggal lahir tidak valid atau di masa depan'),
+    gender: z.enum(['L', 'P']),
+    professionCategory: z.string().min(1, 'Kategori profesi wajib diisi'),
+    fingerprintPin: z.string().optional(),
+    initialContractType: z.string().optional(),
+    initialStartDate: z.string().optional(),
+  }),
+  {
+    identityNumber: '',
+    employeeNumber: '',
+    fullName: '',
+    email: '',
+    dateOfBirth: '',
+    gender: 'L' as 'L' | 'P',
+    professionCategory: 'Non-Medis',
+    fingerprintPin: '',
+    initialContractType: '',
+    initialStartDate: ''
+  }
+)
 
 const unlinkedUsers = ref<any[]>([])
 const selectedMachineUserId = ref<string | null>(null)
@@ -45,7 +76,17 @@ const fetchUnlinkedUsers = async () => {
   }
 }
 
-const handleOpenChange = (val: boolean) => {
+const searchQuery = ref('')
+const filteredUnlinkedUsers = computed(() => {
+  if (!searchQuery.value) return unlinkedUsers.value
+  const q = searchQuery.value.toLowerCase()
+  return unlinkedUsers.value.filter(u =>
+    (u.machineName || '').toLowerCase().includes(q) ||
+    (u.machinePin || '').toLowerCase().includes(q)
+  )
+})
+
+watch(() => props.open, (val) => {
   if (val) {
     fetchUnlinkedUsers()
   } else {
@@ -64,9 +105,9 @@ const handleOpenChange = (val: boolean) => {
       initialStartDate: ''
     }
     selectedMachineUserId.value = null
+    searchQuery.value = ''
   }
-  emit('update:open', val)
-}
+})
 
 const onSubmit = async () => {
   if (!form.validate()) return
@@ -92,7 +133,7 @@ const onSubmit = async () => {
     })
 
     emit('success', response.id)
-    handleOpenChange(false)
+    emit('update:open', false)
   } catch (error: any) {
     form.setApiErrors(error)
 
@@ -108,7 +149,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <Dialog :open="open" @update:open="handleOpenChange">
+  <Dialog :open="open" @update:open="$emit('update:open', $event)">
     <DialogContent class="sm:max-w-[460px] bg-card border-border/60 rounded-3xl p-6 shadow-2xl">
       <DialogHeader>
         <DialogTitle class="text-xl font-bold tracking-tight text-foreground">Tambah Pegawai Baru</DialogTitle>
@@ -227,16 +268,58 @@ const onSubmit = async () => {
 
         <div class="mt-4 p-4 border rounded-xl bg-gray-50 dark:bg-gray-900/50">
           <Label class="block text-sm font-bold mb-2">Tautkan dengan Data Mesin (ZKTeco)</Label>
-          <select v-model="selectedMachineUserId" class="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
-            <option :value="null">-- Tidak Ditautkan --</option>
-            <option v-for="user in unlinkedUsers" :key="user.id" :value="user.id">
-              PIN: {{ user.machinePin }} - {{ user.machineName }}
-            </option>
-          </select>
+          <Popover>
+            <PopoverTrigger as-child>
+              <Button
+                variant="outline"
+                type="button"
+                role="combobox"
+                class="w-full justify-between font-normal bg-white dark:bg-gray-800 border-border rounded-lg text-sm h-10 px-3"
+                :class="!selectedMachineUserId ? 'text-muted-foreground' : ''"
+              >
+                {{ selectedMachineUserId
+                    ? `PIN: ${unlinkedUsers.find(u => u.id === selectedMachineUserId)?.machinePin} - ${unlinkedUsers.find(u => u.id === selectedMachineUserId)?.machineName}`
+                    : '-- Pilih Data Pegawai di Mesin --' }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 h-4 w-4 shrink-0 opacity-50"><path d="m6 9 6 6 6-6"/></svg>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent class="w-[400px] p-0 shadow-xl border border-border rounded-xl z-50 bg-white dark:bg-zinc-950 overflow-hidden">
+              <div class="p-2 border-b">
+                <Input
+                  v-model="searchQuery"
+                  placeholder="Cari nama atau PIN..."
+                  class="h-9 border-none focus-visible:ring-0 shadow-none bg-muted/50 rounded-lg text-sm"
+                />
+              </div>
+              <div class="max-h-[200px] overflow-y-auto p-1">
+                <div v-if="filteredUnlinkedUsers.length === 0" class="p-4 text-center text-xs text-muted-foreground">Data tidak ditemukan.</div>
+
+                <div
+                  v-if="!searchQuery"
+                  class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm cursor-pointer hover:bg-muted"
+                  @click="selectedMachineUserId = null"
+                >
+                   <span class="font-medium text-muted-foreground">-- Tidak Ditautkan --</span>
+                </div>
+
+                <div
+                  v-for="user in filteredUnlinkedUsers"
+                  :key="user.id"
+                  class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm cursor-pointer hover:bg-muted"
+                  :class="{ 'bg-primary/10 text-primary font-bold': selectedMachineUserId === user.id }"
+                  @click="selectedMachineUserId = user.id"
+                >
+                  <span class="font-mono text-xs w-12 shrink-0">PIN:{{ user.machinePin }}</span>
+                  <span class="text-muted-foreground shrink-0">-</span>
+                  <span class="font-medium truncate">{{ user.machineName }}</span>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <DialogFooter class="pt-4">
-          <Button variant="outline" type="button" @click="handleOpenChange(false)" :disabled="form.isSubmitting.value" class="rounded-xl font-bold text-xs h-10">
+          <Button variant="outline" type="button" @click="$emit('update:open', false)" :disabled="form.isSubmitting.value" class="rounded-xl font-bold text-xs h-10">
             Batal
           </Button>
           <Button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs h-10 px-6 shadow-sm" :disabled="form.isSubmitting.value">

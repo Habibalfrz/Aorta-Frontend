@@ -54,7 +54,7 @@ const navigation = [
   { name: 'Log Kehadiran', path: '/hris/attendance', icon: FileClock },
   { name: 'Pengajuan Cuti', path: '/hris/leaves', icon: CalendarDays },
   { name: 'Payroll', path: '/hris/payroll', icon: Banknote },
-  { name: 'HR Settings', path: '/hris/settings', icon: Settings },
+  { name: 'HR Settings', path: '/hris/settings', exact: true, icon: Settings },
 ]
 
 function isRouteActive(itemPath: string, exact?: boolean) {

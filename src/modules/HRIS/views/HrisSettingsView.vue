@@ -809,7 +809,7 @@ const handleDeleteGrade = async (grade: any) => {
                     <TableCell class="font-mono text-xs font-bold text-muted-foreground px-6 py-4">{{ user.machinePin }}</TableCell>
                     <TableCell class="font-bold text-sm text-foreground px-6 py-4">{{ user.machineName }}</TableCell>
                     <TableCell class="px-6 py-4">
-                      <Select :model-value="user.privilegeRole || 'Normal'" @update:model-value="(val) => handleRoleChange(user.id, val)">
+                      <Select :model-value="user.privilegeRole || 'Normal'" @update:model-value="(val) => handleRoleChange(user.id, val as string)">
                         <SelectTrigger class="w-[120px] h-8 text-[10px] font-bold uppercase rounded-full border-none" :class="user.privilegeRole === 'Superadmin' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'">
                           <SelectValue />
                         </SelectTrigger>

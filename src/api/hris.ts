@@ -344,3 +344,20 @@ export async function deleteEmployeeDocument(employeeId: string, documentId: str
   const response = await api.delete(`/api/hris/employees/${employeeId}/documents/${documentId}`)
   return response.data
 }
+
+// --- ZKTECO API ---
+export async function syncZkTecoUsers(ipAddress: string) {
+  const response = await api.post('/api/hris/zkteco/sync', { ipAddress })
+  return response.data
+}
+
+export async function getUnlinkedMachineUsers() {
+  const response = await api.get('/api/hris/zkteco/unlinked-users')
+  return response.data
+}
+
+export async function linkMachineUser(machineUserId: string, employeeId: string) {
+  const response = await api.post('/api/hris/zkteco/link', { machineUserId, employeeId })
+  return response.data
+}
+

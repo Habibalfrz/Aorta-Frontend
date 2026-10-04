@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { z } from 'zod'
 import { useForm } from '@/composables/useForm'
-import { createEmployee } from '@/api/hris'
+import { createEmployee, getUnlinkedMachineUsers, linkMachineUser } from '@/api/hris'
 import { toast } from 'vue-sonner'
+import { onMounted, ref } from 'vue'
 
 import {
   Dialog,
@@ -32,38 +33,22 @@ const emit = defineEmits<{
   (e: 'success', id: string): void
 }>()
 
-const form = useForm(
-  z.object({
-    identityNumber: z.string().min(1, 'No KTP / NIK wajib diisi'),
-    employeeNumber: z.string().min(1, 'NIP (Nomor Pegawai) wajib diisi'),
-    fullName: z.string().min(1, 'Nama lengkap wajib diisi'),
-    email: z.string().email('Format email tidak valid').optional().or(z.literal('')),
-    dateOfBirth: z.string().min(1, 'Tanggal lahir wajib diisi').refine((val) => {
-      const date = new Date(val)
-      return !isNaN(date.getTime()) && date < new Date()
-    }, 'Tanggal lahir tidak valid atau di masa depan'),
-    gender: z.enum(['L', 'P']),
-    professionCategory: z.string().min(1, 'Kategori profesi wajib diisi'),
-    fingerprintPin: z.string().optional(),
-    initialContractType: z.string().optional(),
-    initialStartDate: z.string().optional(),
-  }),
-  {
-    identityNumber: '',
-    employeeNumber: '',
-    fullName: '',
-    email: '',
-    dateOfBirth: '',
-    gender: 'L' as 'L' | 'P',
-    professionCategory: 'Non-Medis',
-    fingerprintPin: '',
-    initialContractType: '',
-    initialStartDate: ''
+const unlinkedUsers = ref<any[]>([])
+const selectedMachineUserId = ref<string | null>(null)
+
+const fetchUnlinkedUsers = async () => {
+  try {
+    const data = await getUnlinkedMachineUsers()
+    unlinkedUsers.value = data
+  } catch (error) {
+    console.error('Failed to load unlinked machine users', error)
   }
-)
+}
 
 const handleOpenChange = (val: boolean) => {
-  if (!val) {
+  if (val) {
+    fetchUnlinkedUsers()
+  } else {
     form.clearErrors()
     // Reset form for next use
     form.data.value = {
@@ -78,6 +63,7 @@ const handleOpenChange = (val: boolean) => {
       initialContractType: '',
       initialStartDate: ''
     }
+    selectedMachineUserId.value = null
   }
   emit('update:open', val)
 }
@@ -87,7 +73,19 @@ const onSubmit = async () => {
 
   form.isSubmitting.value = true
   try {
+    // Override fingerprint pin if a machine user is selected
+    if (selectedMachineUserId.value) {
+      const selectedMachineUser = unlinkedUsers.value.find(u => u.id === selectedMachineUserId.value)
+      if (selectedMachineUser) {
+        form.data.value.fingerprintPin = selectedMachineUser.machinePin
+      }
+    }
+
     const response = await createEmployee(form.data.value)
+
+    if (selectedMachineUserId.value) {
+      await linkMachineUser(selectedMachineUserId.value, response.id)
+    }
 
     toast.success('Pegawai berhasil ditambahkan', {
       description: `Akun user otomatis dibuat (Status: Non-Aktif)`,
@@ -225,6 +223,16 @@ const onSubmit = async () => {
             placeholder="Contoh: 101 (Default: mengikuti NIK)"
             class="bg-muted/50 border-border/50 rounded-xl font-mono"
           />
+        </div>
+
+        <div class="mt-4 p-4 border rounded-xl bg-gray-50 dark:bg-gray-900/50">
+          <Label class="block text-sm font-bold mb-2">Tautkan dengan Data Mesin (ZKTeco)</Label>
+          <select v-model="selectedMachineUserId" class="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+            <option :value="null">-- Tidak Ditautkan --</option>
+            <option v-for="user in unlinkedUsers" :key="user.id" :value="user.id">
+              PIN: {{ user.machinePin }} - {{ user.machineName }}
+            </option>
+          </select>
         </div>
 
         <DialogFooter class="pt-4">

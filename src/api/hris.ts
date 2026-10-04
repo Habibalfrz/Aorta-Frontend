@@ -361,3 +361,9 @@ export async function linkMachineUser(machineUserId: string, employeeId: string)
   return response.data
 }
 
+export async function getAllMachineUsers() {
+  const response = await api.get('/api/hris/zkteco/users')
+  return response.data.data || []
+}
+
+

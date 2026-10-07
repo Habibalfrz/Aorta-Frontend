@@ -51,6 +51,7 @@ const navigation = [
   { name: 'HR Dashboard', path: '/hris', exact: true, icon: LayoutDashboard },
   { name: 'Data Pegawai', path: '/hris/employees', icon: Users },
   { name: 'Manajemen Shift', path: '/hris/shifts', icon: CalendarDays },
+  { name: 'Penjadwalan Shift', path: '/hris/rostering', icon: CalendarDays },
   { name: 'Log Kehadiran', path: '/hris/attendance', icon: FileClock },
   { name: 'Pengajuan Cuti', path: '/hris/leaves', icon: CalendarDays },
   { name: 'Payroll', path: '/hris/payroll', icon: Banknote },

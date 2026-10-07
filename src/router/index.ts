@@ -136,6 +136,14 @@ const routes: Array<RouteRecordRaw> = [
         }
       },
       {
+        path: 'rostering',
+        name: 'Penjadwalan Shift',
+        component: () => import('../modules/HRIS/views/MonthlyRosteringView.vue'),
+        meta: {
+          permissions: ['hris.schedules.read', 'hris.schedules.write']
+        }
+      },
+      {
         path: 'leaves',
         name: 'Pengajuan Cuti',
         component: () => import('../modules/HRIS/views/LeaveManagementView.vue'),

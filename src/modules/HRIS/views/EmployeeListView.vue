@@ -17,6 +17,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup
 } from '@/components/ui/select'
 import {
   Dialog,
@@ -456,10 +457,12 @@ watch([activeTab, attendancePeriod], ([newTab]) => {
                 <SelectValue placeholder="Departemen" />
               </SelectTrigger>
               <SelectContent class="rounded-sm border-border shadow-xl bg-card text-foreground z-50">
-                <SelectItem value="ALL" class="text-xs">Semua Departemen</SelectItem>
-                <SelectItem v-for="dept in departments" :key="dept.id" :value="dept.name" class="text-xs">
-                  {{ dept.name }}
-                </SelectItem>
+                <SelectGroup>
+                  <SelectItem value="ALL" class="text-xs">Semua Departemen</SelectItem>
+                  <SelectItem v-for="dept in departments" :key="dept.id" :value="dept.name" class="text-xs">
+                    {{ dept.name }}
+                  </SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
@@ -783,6 +786,7 @@ watch([activeTab, attendancePeriod], ([newTab]) => {
                         <TableHead class="w-[180px] text-xs font-bold uppercase tracking-wider text-muted-foreground h-10">Tanggal</TableHead>
                         <TableHead class="text-xs font-bold uppercase tracking-wider text-muted-foreground h-10">Jadwal Shift</TableHead>
                         <TableHead class="text-xs font-bold uppercase tracking-wider text-muted-foreground h-10">Check In</TableHead>
+                        <TableHead class="text-xs font-bold uppercase tracking-wider text-muted-foreground h-10">Check In Siang</TableHead>
                         <TableHead class="text-xs font-bold uppercase tracking-wider text-muted-foreground h-10">Check Out</TableHead>
                         <TableHead class="text-xs font-bold uppercase tracking-wider text-muted-foreground h-10">Durasi</TableHead>
                         <TableHead class="text-xs font-bold uppercase tracking-wider text-muted-foreground h-10">Catatan / Anomali</TableHead>
@@ -805,6 +809,10 @@ watch([activeTab, attendancePeriod], ([newTab]) => {
                         <TableCell class="py-3 font-mono text-sm font-medium" :class="log.lateMinutes > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'">
                           {{ log.checkIn }}
                           <p v-if="log.checkIn !== '-'" class="text-[9px] font-sans text-muted-foreground mt-0.5 font-normal">Mesin Absensi</p>
+                        </TableCell>
+                        <TableCell class="py-3 font-mono text-sm font-medium text-foreground">
+                          {{ log.checkInSiang || '-' }}
+                          <p v-if="log.checkInSiang && log.checkInSiang !== '-'" class="text-[9px] font-sans text-muted-foreground mt-0.5 font-normal">Mesin Absensi</p>
                         </TableCell>
                         <TableCell class="py-3 font-mono text-sm font-medium" :class="log.isAnomaly && log.status === 'MissingCheckOut' ? 'text-destructive' : 'text-foreground'">
                           {{ log.checkOut !== '-' ? log.checkOut : '--:--' }}
@@ -1020,9 +1028,11 @@ watch([activeTab, attendancePeriod], ([newTab]) => {
                   <SelectValue placeholder="Pilih Departemen" />
                 </SelectTrigger>
                 <SelectContent class="rounded-sm border-border shadow-xl bg-card text-foreground z-50 max-h-56">
-                  <SelectItem v-for="dept in departments" :key="dept.id" :value="dept.id" class="text-xs">
-                    {{ dept.name }}
-                  </SelectItem>
+                  <SelectGroup>
+                    <SelectItem v-for="dept in departments" :key="dept.id" :value="dept.id" class="text-xs">
+                      {{ dept.name }}
+                    </SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
@@ -1034,9 +1044,11 @@ watch([activeTab, attendancePeriod], ([newTab]) => {
                   <SelectValue placeholder="Pilih Jabatan" />
                 </SelectTrigger>
                 <SelectContent class="rounded-sm border-border shadow-xl bg-card text-foreground z-50 max-h-56">
-                  <SelectItem v-for="job in jobPositions" :key="job.id" :value="job.id" class="text-xs">
-                    {{ job.name }}
-                  </SelectItem>
+                  <SelectGroup>
+                    <SelectItem v-for="job in jobPositions" :key="job.id" :value="job.id" class="text-xs">
+                      {{ job.name }}
+                    </SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>

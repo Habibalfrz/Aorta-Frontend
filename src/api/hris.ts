@@ -164,18 +164,31 @@ export async function getShifts() {
   return response.data.data || []
 }
 
-export async function createShift(payload: { code: string; name: string; startTime: string; endTime: string; toleranceMinutes: number }) {
+export async function createShift(payload: { code: string; name: string; startTime: string; endTime: string; toleranceMinutes: number; departmentId?: string }) {
   const response = await api.post('/api/hris/shifts', payload)
   return response.data
 }
 
-export async function updateShift(id: string, payload: { code: string; name: string; startTime: string; endTime: string; toleranceMinutes: number }) {
+export async function updateShift(id: string, payload: { code: string; name: string; startTime: string; endTime: string; toleranceMinutes: number; departmentId?: string }) {
   const response = await api.put(`/api/hris/shifts/${id}`, payload)
   return response.data
 }
 
 export async function deleteShift(id: string) {
   const response = await api.delete(`/api/hris/shifts/${id}`)
+  return response.data
+}
+
+// --- SCHEDULES API ---
+export async function getSchedules(month: number, year: number, departmentId?: string) {
+  const params: any = { month, year }
+  if (departmentId && departmentId !== 'ALL') params.departmentId = departmentId
+  const response = await api.get('/api/hris/schedules', { params })
+  return response.data.data || []
+}
+
+export async function generateMonthlyRoster(payload: { month: number; year: number; departmentId?: string; rosters: { employeeId: string; date: string; workShiftId: string }[] }) {
+  const response = await api.post('/api/hris/schedules/generate-roster', payload)
   return response.data
 }
 

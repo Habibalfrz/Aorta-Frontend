@@ -161,7 +161,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'settings',
-        name: 'HR Settings',
+        name: 'Struktur Organisasi & Aturan',
         component: () => import('../modules/HRIS/views/HrisSettingsView.vue'),
         meta: {
           permissions: ['hris.settings.read', 'hris.departments.read', 'hris.jobpositions.read', 'hris.grades.read', 'hris.employees.read']

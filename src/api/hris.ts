@@ -187,6 +187,16 @@ export async function getSchedules(month: number, year: number, departmentId?: s
   return response.data.data || []
 }
 
+export async function getEmployeeSchedule(employeeId: string, month: number, year: number) {
+  const params: any = { month, year }
+  const response = await api.get(`/api/hris/schedules/${employeeId}`, { params })
+  return response.data.data || []
+}
+
+export function getExportEmployeeScheduleUrl(employeeId: string, month: number, year: number): string {
+  return `/api/hris/schedules/${employeeId}/export?month=${month}&year=${year}`
+}
+
 export async function generateMonthlyRoster(payload: { month: number; year: number; departmentId?: string; rosters: { employeeId: string; date: string; workShiftId: string }[] }) {
   const response = await api.post('/api/hris/schedules/generate-roster', payload)
   return response.data

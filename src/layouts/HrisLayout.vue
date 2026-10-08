@@ -47,15 +47,30 @@ onMounted(() => {
   }
 })
 
-const navigation = [
-  { name: 'HR Dashboard', path: '/hris', exact: true, icon: LayoutDashboard },
-  { name: 'Data Pegawai', path: '/hris/employees', icon: Users },
-  { name: 'Manajemen Shift', path: '/hris/shifts', icon: CalendarDays },
-  { name: 'Penjadwalan Shift', path: '/hris/rostering', icon: CalendarDays },
-  { name: 'Log Kehadiran', path: '/hris/attendance', icon: FileClock },
-  { name: 'Pengajuan Cuti', path: '/hris/leaves', icon: CalendarDays },
-  { name: 'Payroll', path: '/hris/payroll', icon: Banknote },
-  { name: 'HR Settings', path: '/hris/settings', exact: true, icon: Settings },
+const navigationGroups = [
+  {
+    title: 'Overview',
+    items: [
+      { name: 'HR Dashboard', path: '/hris', exact: true, icon: LayoutDashboard },
+    ]
+  },
+  {
+    title: 'Data Master',
+    items: [
+      { name: 'Data Pegawai', path: '/hris/employees', icon: Users },
+      { name: 'Manajemen Shift', path: '/hris/shifts', icon: CalendarDays },
+      { name: 'Struktur & Aturan', path: '/hris/settings', exact: true, icon: Settings },
+    ]
+  },
+  {
+    title: 'Operasional & Transaksi',
+    items: [
+      { name: 'Penjadwalan Shift', path: '/hris/rostering', icon: CalendarDays },
+      { name: 'Log Kehadiran', path: '/hris/attendance', icon: FileClock },
+      { name: 'Pengajuan Cuti', path: '/hris/leaves', icon: CalendarDays },
+      { name: 'Payroll', path: '/hris/payroll', icon: Banknote },
+    ]
+  }
 ]
 
 function isRouteActive(itemPath: string, exact?: boolean) {
@@ -86,24 +101,27 @@ function handleNavigation(path: string) {
         </div>
       </div>
 
-      <nav class="flex-1 py-4 px-4 space-y-1 overflow-y-auto custom-scrollbar">
-        <button
-          v-for="item in navigation"
-          :key="item.name"
-          @click="handleNavigation(item.path)"
-          class="w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary group"
-          :class="isRouteActive(item.path, item.exact) ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
-        >
-          <div class="relative w-6 h-6 mr-2 flex items-center justify-center">
-            <span v-if="!isRouteActive(item.path, item.exact)" class="absolute inset-0 rounded-full bg-primary/20 scale-0 group-hover:scale-100 transition-transform duration-300 ease-out opacity-0 group-hover:opacity-100"></span>
-            <component
-              :is="item.icon"
-              class="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-110"
-              :class="isRouteActive(item.path, item.exact) ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'"
-            />
-          </div>
-          <span class="text-sm">{{ item.name }}</span>
-        </button>
+      <nav class="flex-1 py-4 px-4 space-y-6 overflow-y-auto custom-scrollbar">
+        <div v-for="(group, idx) in navigationGroups" :key="idx" class="space-y-1">
+          <p class="px-3 text-[10px] font-bold tracking-widest text-muted-foreground uppercase mb-2">{{ group.title }}</p>
+          <button
+            v-for="item in group.items"
+            :key="item.name"
+            @click="handleNavigation(item.path)"
+            class="w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary group"
+            :class="isRouteActive(item.path, item.exact) ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
+          >
+            <div class="relative w-6 h-6 mr-2 flex items-center justify-center">
+              <span v-if="!isRouteActive(item.path, item.exact)" class="absolute inset-0 rounded-full bg-primary/20 scale-0 group-hover:scale-100 transition-transform duration-300 ease-out opacity-0 group-hover:opacity-100"></span>
+              <component
+                :is="item.icon"
+                class="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-110"
+                :class="isRouteActive(item.path, item.exact) ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'"
+              />
+            </div>
+            <span class="text-sm">{{ item.name }}</span>
+          </button>
+        </div>
       </nav>
 
       <div class="p-4 shrink-0 border-t border-border/60">
@@ -222,17 +240,20 @@ function handleNavigation(path: string) {
               </div>
               <span class="font-bold text-base tracking-tight text-foreground">HRIS Portal</span>
             </div>
-            <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-              <button
-                v-for="item in navigation"
-                :key="item.name"
-                @click="handleNavigation(item.path)"
-                class="w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                :class="isRouteActive(item.path, item.exact) ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
-              >
-                <component :is="item.icon" class="w-4 h-4 mr-3" :class="isRouteActive(item.path, item.exact) ? 'text-primary' : 'text-muted-foreground'" />
-                <span class="text-sm">{{ item.name }}</span>
-              </button>
+            <nav class="flex-1 py-4 px-3 space-y-6 overflow-y-auto">
+              <div v-for="(group, idx) in navigationGroups" :key="idx" class="space-y-1">
+                <p class="px-3 text-[10px] font-bold tracking-widest text-muted-foreground uppercase mb-2">{{ group.title }}</p>
+                <button
+                  v-for="item in group.items"
+                  :key="item.name"
+                  @click="handleNavigation(item.path)"
+                  class="w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  :class="isRouteActive(item.path, item.exact) ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
+                >
+                  <component :is="item.icon" class="w-4 h-4 mr-3" :class="isRouteActive(item.path, item.exact) ? 'text-primary' : 'text-muted-foreground'" />
+                  <span class="text-sm">{{ item.name }}</span>
+                </button>
+              </div>
             </nav>
             <div class="p-4 shrink-0 border-t border-border">
               <button

@@ -424,7 +424,7 @@ const handleDeleteGrade = async (grade: any) => {
     <!-- Page Title -->
     <div class="transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
          :class="isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
-      <h1 class="text-3xl font-bold tracking-tight text-foreground">Pengaturan & Master Data HRIS</h1>
+      <h1 class="text-3xl font-bold tracking-tight text-foreground">Struktur Organisasi & Aturan</h1>
       <p class="text-sm text-muted-foreground mt-1 font-medium">Kelola struktur organisasi, departemen, posisi jabatan, jenjang golongan, dan kebijakan denda presensi.</p>
     </div>
 

@@ -232,6 +232,12 @@ const getShiftDetails = (shiftId: string) => {
   }
 }
 
+const getShiftTooltip = (shiftId: string) => {
+  const details = getShiftDetails(shiftId)
+  if (!details) return 'Kosong (Klik untuk isi)'
+  return `${details.name} (${details.startTime} - ${details.endTime})`
+}
+
 const getDayOfWeek = (day: number) => {
   if (!selectedMonth.value) return ''
   const [year, month] = selectedMonth.value.split('-')
@@ -626,8 +632,8 @@ watch([selectedDepartment, selectedMonth], () => {
                       :class="{'active:scale-90': !activeBrush, 'hover:border-primary/30': activeBrush}"
                       :style="getShiftStyle(matrix[emp.id][day])"
                       tabindex="0"
-                      :title="getShiftDetails(matrix[emp.id]?.[day]) ? `${getShiftDetails(matrix[emp.id][day]).name} (${getShiftDetails(matrix[emp.id][day]).startTime} - ${getShiftDetails(matrix[emp.id][day]).endTime})` : 'Kosong'"
-                      @click="handleCellClick(emp.id, day)"
+                      :title="getShiftTooltip(matrix[emp.id]?.[day])"
+                      @click="handleCellClick(emp.id, day, $event)"
                       @keydown="handleCellKeydown($event, emp.id, day)"
                     >
                       <span v-if="!matrix[emp.id]?.[day] || matrix[emp.id][day] === 'EMPTY'" class="opacity-0 hover:opacity-40 text-muted-foreground transition-opacity font-medium">+</span>

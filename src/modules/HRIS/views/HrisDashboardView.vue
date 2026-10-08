@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Users, FileClock, CalendarDays, TrendingUp, UserPlus, Building2, UserCog, Calculator, CheckSquare, Clock, Stethoscope, FileText, ChevronRight, Banknote } from 'lucide-vue-next'
+import { Users, FileClock, CalendarDays, TrendingUp, UserPlus, UserCog, Calculator, CheckSquare, Clock, Stethoscope, FileText, ChevronRight, Banknote } from 'lucide-vue-next'
 import api from '@/api/axios'
 import { Card } from '@/components/ui/card'
 import LeaveCalendarWidget from '../components/Dashboard/LeaveCalendarWidget.vue'
@@ -42,8 +42,6 @@ onMounted(() => {
 const getTodayDateString = () => {
   return new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 }
-
-const currentMonthName = new Date().toLocaleDateString('id-ID', { month: 'long' })
 </script>
 
 <template>

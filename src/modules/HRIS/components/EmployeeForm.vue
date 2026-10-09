@@ -36,7 +36,7 @@ const emit = defineEmits<{
 
 const form = useForm(
   z.object({
-    identityNumber: z.string().min(1, 'No KTP / NIK wajib diisi'),
+    identityNumber: z.string().min(1, 'No KTP / NIK wajib diisi').length(16, 'NIK harus tepat 16 digit angka').regex(/^\d+$/, 'NIK hanya boleh berisi angka'),
     employeeNumber: z.string().min(1, 'NIP (Nomor Pegawai) wajib diisi'),
     fullName: z.string().min(1, 'Nama lengkap wajib diisi'),
     email: z.string().email('Format email tidak valid').optional().or(z.literal('')),
@@ -169,6 +169,8 @@ const onSubmit = async () => {
             id="identityNumber"
             v-model="form.data.value.identityNumber"
             placeholder="16 digit NIK KTP"
+            maxlength="16"
+            @input="form.data.value.identityNumber = form.data.value.identityNumber.replace(/\D/g, '').slice(0, 16)"
             class="bg-muted/50 border-border/50 rounded-xl"
             :class="{ 'border-destructive focus-visible:ring-destructive': form.errors.value.identityNumber }"
           />

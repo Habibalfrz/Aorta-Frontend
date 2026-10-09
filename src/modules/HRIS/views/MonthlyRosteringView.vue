@@ -252,6 +252,13 @@ const isToday = (day: number) => {
   return now.getDate() === day && now.getMonth() + 1 === parseInt(month) && now.getFullYear() === parseInt(year)
 }
 
+const isSunday = (day: number) => {
+  if (!selectedMonth.value) return false
+  const [year, month] = selectedMonth.value.split('-')
+  const date = new Date(parseInt(year), parseInt(month) - 1, day)
+  return date.getDay() === 0
+}
+
 // Copy Paste Schedule
 const copiedSchedule = ref<Record<number, string> | null>(null)
 
@@ -603,8 +610,22 @@ watch([selectedDepartment, selectedMonth], () => {
                   <th class="sticky left-0 z-50 bg-background border-r border-border/40 p-4 w-64 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                     <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Nama Pegawai</p>
                   </th>
-                  <th v-for="day in daysArray" :key="day" class="p-2 text-center border-r border-border/20 min-w-[44px]">
-                    <p class="text-[10px] font-bold text-muted-foreground uppercase">{{ day }}</p>
+                  <th v-for="day in daysArray" :key="day"
+                      class="p-2 text-center border-r border-border/20 min-w-[50px] relative transition-colors"
+                      :class="{ 'bg-primary/5': isToday(day), 'bg-destructive/5': isSunday(day) && !isToday(day) }">
+                    <div v-if="isToday(day)" class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+                    <div class="flex flex-col items-center justify-center gap-0.5">
+                      <span class="text-[9px] uppercase font-bold tracking-widest"
+                            :class="[
+                               isToday(day) ? 'text-primary' :
+                               isSunday(day) ? 'text-destructive/80' : 'text-muted-foreground/60'
+                            ]">{{ getDayOfWeek(day) }}</span>
+                      <span class="font-black text-sm"
+                            :class="[
+                               isToday(day) ? 'text-primary' :
+                               isSunday(day) ? 'text-destructive/80' : 'text-foreground/80'
+                            ]">{{ day }}</span>
+                    </div>
                   </th>
                 </tr>
               </thead>
@@ -626,7 +647,9 @@ watch([selectedDepartment, selectedMonth], () => {
                       </div>
                     </div>
                   </td>
-                  <td v-for="day in daysArray" :key="day" class="p-1 border-r border-border/10 text-center relative h-12">
+                  <td v-for="day in daysArray" :key="day"
+                      class="p-1 border-r border-border/10 text-center relative h-12 transition-colors"
+                      :class="{ 'bg-primary/[0.02]': isToday(day), 'bg-destructive/[0.02]': isSunday(day) && !isToday(day) }">
                     <div
                       :id="`cell-${emp.id}-${day}`"
                       class="matrix-cell w-full h-full rounded-md text-[11px] font-bold flex items-center justify-center cursor-pointer transition-all outline-none focus:ring-2 focus:ring-primary focus:shadow-md hover:bg-muted border border-transparent select-none"
@@ -658,12 +681,20 @@ watch([selectedDepartment, selectedMonth], () => {
                   </th>
                   <th v-for="day in daysArray" :key="day"
                       class="p-2 text-center min-w-[50px] transition-colors relative"
-                      :class="{ 'bg-primary/5': isToday(day) }">
+                      :class="{ 'bg-primary/5': isToday(day), 'bg-destructive/5': isSunday(day) && !isToday(day) }">
                     <!-- Tiang Fokus Hari Ini (Top Cap) -->
                     <div v-if="isToday(day)" class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
                     <div class="flex flex-col items-center justify-center gap-0.5">
-                      <span class="text-[9px] uppercase font-bold tracking-widest" :class="isToday(day) ? 'text-primary' : 'text-muted-foreground/60'">{{ getDayOfWeek(day) }}</span>
-                      <span class="font-black text-sm" :class="isToday(day) ? 'text-primary' : 'text-foreground/80'">{{ day }}</span>
+                      <span class="text-[9px] uppercase font-bold tracking-widest"
+                            :class="[
+                               isToday(day) ? 'text-primary' :
+                               isSunday(day) ? 'text-destructive/80' : 'text-muted-foreground/60'
+                            ]">{{ getDayOfWeek(day) }}</span>
+                      <span class="font-black text-sm"
+                            :class="[
+                               isToday(day) ? 'text-primary' :
+                               isSunday(day) ? 'text-destructive/80' : 'text-foreground/80'
+                            ]">{{ day }}</span>
                     </div>
                   </th>
                 </tr>
@@ -682,8 +713,8 @@ watch([selectedDepartment, selectedMonth], () => {
                     </div>
                   </td>
                   <td v-for="day in daysArray" :key="day"
-                      class="p-1 text-center h-[52px] align-middle"
-                      :class="{ 'bg-primary/[0.03]' : isToday(day) }">
+                      class="p-1 text-center h-[52px] align-middle transition-colors"
+                      :class="{ 'bg-primary/[0.03]' : isToday(day), 'bg-destructive/[0.02]': isSunday(day) && !isToday(day) }">
                     <!-- Empty State -->
                     <template v-if="!getShiftDetails(matrix[emp.id]?.[day])"></template>
 

@@ -436,7 +436,8 @@ watch([selectedDepartment, selectedMonth], () => {
 </script>
 
 <template>
-  <div class="h-full space-y-6 max-w-[1600px] pb-10">
+  <div class="monthly-rostering-wrapper h-full">
+    <div class="h-full space-y-6 max-w-[1600px] pb-10">
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
@@ -754,5 +755,6 @@ watch([selectedDepartment, selectedMonth], () => {
       </div>
       <kbd class="text-[9px] text-muted-foreground bg-muted group-hover:bg-background px-1.5 py-0.5 rounded border border-border/50 shrink-0 font-mono mt-0.5">{{ shift.hotkey }}</kbd>
     </button>
+  </div>
   </div>
 </template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   Clock, Search, Download, RefreshCw, Radio,
-  ShieldCheck, AlertTriangle, Moon, Edit3, Loader2, Sparkles
+  ShieldCheck, AlertTriangle, Moon, Edit3, Loader2, Sparkles, ChevronLeft, ChevronRight
 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
@@ -145,6 +145,23 @@ const filteredLogs = computed(() => {
     log.machineSn?.toLowerCase().includes(q)
   )
 })
+
+// Pagination state
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+// Reset pagination when search changes
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+
+const paginatedLogs = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredLogs.value.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(filteredLogs.value.length / itemsPerPage.value))
 
 // Recap Summary KPIs
 const totalHadirAll = computed(() => recaps.value.reduce((acc, r) => acc + (r.totalPresentDays || 0), 0))
@@ -371,7 +388,7 @@ onMounted(() => {
                   </TableCell>
                 </TableRow>
                 <template v-else>
-                  <TableRow v-for="log in filteredLogs" :key="log.id" class="hover:bg-muted/20 transition-colors">
+                  <TableRow v-for="log in paginatedLogs" :key="log.id" class="hover:bg-muted/20 transition-colors">
                     <TableCell class="font-mono text-xs font-semibold text-foreground px-6 py-4">
                       {{ new Date(log.timestamp).toLocaleString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}
                     </TableCell>
@@ -396,7 +413,7 @@ onMounted(() => {
                       </Badge>
                     </TableCell>
                   </TableRow>
-                  <TableRow v-if="filteredLogs.length === 0">
+                  <TableRow v-if="paginatedLogs.length === 0">
                     <TableCell colspan="5" class="h-28 text-center text-muted-foreground text-sm font-medium">
                       Tidak ada data log presensi yang cocok dengan pencarian.
                     </TableCell>
@@ -405,6 +422,38 @@ onMounted(() => {
 </template>
               </TableBody>
             </Table>
+          </div>
+
+          <!-- Pagination UI -->
+          <div class="flex items-center justify-between mt-4" v-if="filteredLogs.length > 0">
+            <p class="text-xs text-muted-foreground font-medium">
+              Menampilkan <span class="font-bold text-foreground">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
+              sampai <span class="font-bold text-foreground">{{ Math.min(currentPage * itemsPerPage, filteredLogs.length) }}</span>
+              dari <span class="font-bold text-foreground">{{ filteredLogs.length }}</span> data
+            </p>
+            <div class="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                class="w-8 h-8 rounded-lg"
+                :disabled="currentPage === 1"
+                @click="currentPage--"
+              >
+                <ChevronLeft class="w-4 h-4" />
+              </Button>
+              <div class="text-xs font-bold px-2">
+                Halaman {{ currentPage }} dari {{ totalPages === 0 ? 1 : totalPages }}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                class="w-8 h-8 rounded-lg"
+                :disabled="currentPage >= totalPages"
+                @click="currentPage++"
+              >
+                <ChevronRight class="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       </TabsContent>

@@ -343,9 +343,10 @@ const calculateDuration = (checkIn: string, checkOut: string) => {
 }
 
 const mapStatusToUI = (status: string, isAnomaly: boolean) => {
-  if (isAnomaly || status === 'MissingCheckOut') return 'Lupa Tap Pulang'
+  if (status === 'MissingCheckOut') return 'Lupa Tap Pulang'
+  if (isAnomaly) return 'Anomali Jadwal'
+  if (status === 'Present' || status === 'OnTime') return 'Hadir'
   if (status === 'Late') return 'Terlambat'
-  if (status === 'OnTime') return 'Tepat Waktu'
   return status
 }
 
@@ -358,7 +359,7 @@ const attendanceStats = computed(() => {
   let lateMinutesTotal = 0
   
   data.forEach(log => {
-    if (log.status === 'OnTime') onTime++
+    if (log.status === 'OnTime' || log.status === 'Present') onTime++
     if (log.status === 'Late') {
       late++
       lateMinutesTotal += (log.lateMinutes || 0)
@@ -387,7 +388,8 @@ const attendanceStats = computed(() => {
 const fetchAttendance = async () => {
   if (!selectedEmployee.value) return
   isLoadingAttendance.value = true
-  
+  attendanceData.value = [] // Clear previous data
+
   try {
     const end = new Date()
     let start = new Date()
@@ -411,8 +413,8 @@ const fetchAttendance = async () => {
   }
 }
 
-watch([activeTab, attendancePeriod], ([newTab]) => {
-  if (newTab === 'kehadiran') {
+watch([activeTab, attendancePeriod, () => selectedEmployee.value?.id], () => {
+  if (activeTab.value === 'kehadiran') {
     fetchAttendance()
   }
 })
@@ -826,10 +828,13 @@ watch([activeTab, attendancePeriod], ([newTab]) => {
                           <div v-if="log.isAnomaly && log.status === 'MissingCheckOut'" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border border-destructive/20 bg-destructive/10 text-destructive text-[10px] font-bold uppercase tracking-wider">
                             <FileWarning class="w-3 h-3" /> Lupa Tap Pulang
                           </div>
+                          <div v-else-if="log.isAnomaly" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                            <FileWarning class="w-3 h-3" /> Anomali Jadwal
+                          </div>
                           <div v-else-if="log.lateMinutes > 0" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">
                             <Timer class="w-3 h-3" /> Telat {{ log.lateMinutes }} Menit
                           </div>
-                          <div v-else-if="log.status === 'OnTime'" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                          <div v-else-if="log.status === 'Present' || log.status === 'OnTime'" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
                             <CheckCircle2 class="w-3 h-3" /> Lengkap
                           </div>
                           <div v-else class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border border-border bg-muted text-muted-foreground text-[10px] font-bold uppercase tracking-wider">

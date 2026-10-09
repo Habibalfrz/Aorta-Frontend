@@ -402,54 +402,6 @@ onMounted(() => {
                       Tidak ada data log presensi yang cocok dengan pencarian.
                     </TableCell>
                   </TableRow>
-                
-    <!-- Trigger Sync Dialog -->
-    <Dialog v-model:open="isSyncModalOpen">
-      <DialogContent class="sm:max-w-[425px] rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl">
-        <DialogHeader>
-          <DialogTitle class="text-lg font-bold flex items-center gap-2 text-primary">
-            <RefreshCw class="w-5 h-5" />
-            Sinkronisasi Kehadiran
-          </DialogTitle>
-          <DialogDescription class="text-xs text-muted-foreground mt-2 leading-relaxed">
-            Sistem secara bawaan hanya akan memproses data log mentah terbaru yang belum diproses sebelumnya.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="py-4 space-y-4">
-          <div class="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-border/50 p-4 shadow-sm bg-muted/10">
-            <Checkbox id="forceRecalculate" v-model:checked="forceRecalculateSync" />
-            <div class="space-y-1 leading-none">
-              <Label for="forceRecalculate" class="font-bold text-sm cursor-pointer">
-                Kalkulasi Ulang Semua Data
-              </Label>
-              <p class="text-[11px] text-muted-foreground mt-1">
-                Centang opsi ini hanya jika Anda ingin merekonstruksi seluruh data.
-              </p>
-            </div>
-          </div>
-          
-          <div v-if="forceRecalculateSync" class="p-3 bg-destructive/10 border border-destructive/20 rounded-xl flex items-start gap-3 animate-in fade-in zoom-in-95 duration-200">
-            <AlertTriangle class="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-            <div class="text-xs text-destructive font-medium leading-relaxed">
-              <span class="font-bold block mb-0.5">Peringatan Keras:</span>
-              Sistem akan menghapus seluruh data kehadiran dan denda yang belum dikunci secara manual, lalu menghitungnya ulang dari 0. Proses ini membutuhkan waktu sedikit lebih lama.
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter class="sm:justify-end gap-2 pt-2 border-t border-border/50 mt-4">
-          <Button variant="ghost" class="rounded-xl font-semibold text-xs" @click="isSyncModalOpen = false" :disabled="isTriggeringCron">
-            Batal
-          </Button>
-          <Button type="button" @click="triggerCronjob" class="rounded-xl font-bold text-xs gap-2" :disabled="isTriggeringCron" :variant="forceRecalculateSync ? 'destructive' : 'default'">
-            <Loader2 v-if="isTriggeringCron" class="w-3.5 h-3.5 animate-spin" />
-            <RefreshCw v-else class="w-3.5 h-3.5" />
-            {{ forceRecalculateSync ? 'Force Recalculate' : 'Mulai Sinkronisasi' }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
 
 </template>
               </TableBody>
@@ -648,54 +600,6 @@ onMounted(() => {
                       Belum ada data rekapan presensi untuk periode {{ months.find(m => m.value === selectedMonth)?.label }} {{ selectedYear }}.
                     </TableCell>
                   </TableRow>
-                
-    <!-- Trigger Sync Dialog -->
-    <Dialog v-model:open="isSyncModalOpen">
-      <DialogContent class="sm:max-w-[425px] rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl">
-        <DialogHeader>
-          <DialogTitle class="text-lg font-bold flex items-center gap-2 text-primary">
-            <RefreshCw class="w-5 h-5" />
-            Sinkronisasi Kehadiran
-          </DialogTitle>
-          <DialogDescription class="text-xs text-muted-foreground mt-2 leading-relaxed">
-            Sistem secara bawaan hanya akan memproses data log mentah terbaru yang belum diproses sebelumnya.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="py-4 space-y-4">
-          <div class="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-border/50 p-4 shadow-sm bg-muted/10">
-            <Checkbox id="forceRecalculate" v-model:checked="forceRecalculateSync" />
-            <div class="space-y-1 leading-none">
-              <Label for="forceRecalculate" class="font-bold text-sm cursor-pointer">
-                Kalkulasi Ulang Semua Data
-              </Label>
-              <p class="text-[11px] text-muted-foreground mt-1">
-                Centang opsi ini hanya jika Anda ingin merekonstruksi seluruh data.
-              </p>
-            </div>
-          </div>
-          
-          <div v-if="forceRecalculateSync" class="p-3 bg-destructive/10 border border-destructive/20 rounded-xl flex items-start gap-3 animate-in fade-in zoom-in-95 duration-200">
-            <AlertTriangle class="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-            <div class="text-xs text-destructive font-medium leading-relaxed">
-              <span class="font-bold block mb-0.5">Peringatan Keras:</span>
-              Sistem akan menghapus seluruh data kehadiran dan denda yang belum dikunci secara manual, lalu menghitungnya ulang dari 0. Proses ini membutuhkan waktu sedikit lebih lama.
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter class="sm:justify-end gap-2 pt-2 border-t border-border/50 mt-4">
-          <Button variant="ghost" class="rounded-xl font-semibold text-xs" @click="isSyncModalOpen = false" :disabled="isTriggeringCron">
-            Batal
-          </Button>
-          <Button type="button" @click="triggerCronjob" class="rounded-xl font-bold text-xs gap-2" :disabled="isTriggeringCron" :variant="forceRecalculateSync ? 'destructive' : 'default'">
-            <Loader2 v-if="isTriggeringCron" class="w-3.5 h-3.5 animate-spin" />
-            <RefreshCw v-else class="w-3.5 h-3.5" />
-            {{ forceRecalculateSync ? 'Force Recalculate' : 'Mulai Sinkronisasi' }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
 
 </template>
               </TableBody>
@@ -822,7 +726,7 @@ onMounted(() => {
     </Dialog>
 
     <!-- Trigger Sync Dialog -->
-    <Dialog v-model:open="isSyncModalOpen">
+    <Dialog :open="isSyncModalOpen" @update:open="isSyncModalOpen = $event">
       <DialogContent class="sm:max-w-[425px] rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle class="text-lg font-bold flex items-center gap-2 text-primary">
@@ -835,15 +739,23 @@ onMounted(() => {
         </DialogHeader>
 
         <div class="py-4 space-y-4">
-          <div class="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-border/50 p-4 shadow-sm bg-muted/10">
-            <Checkbox id="forceRecalculate" v-model:checked="forceRecalculateSync" />
+          <div
+            class="flex flex-row items-start space-x-3 space-y-0 rounded-xl border border-border/50 p-4 shadow-sm bg-muted/10 cursor-pointer hover:bg-muted/20 transition-colors"
+            @click="forceRecalculateSync = !forceRecalculateSync"
+          >
+            <div
+              class="grid place-content-center h-4 w-4 shrink-0 rounded-sm border border-primary shadow mt-0.5 transition-colors"
+              :class="forceRecalculateSync ? 'bg-primary text-primary-foreground' : 'bg-transparent'"
+            >
+              <svg v-if="forceRecalculateSync" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
             <div class="space-y-1 leading-none">
-              <Label for="forceRecalculate" class="font-bold text-sm cursor-pointer">
+              <span class="font-bold text-sm cursor-pointer block">
                 Kalkulasi Ulang Semua Data
-              </Label>
-              <p class="text-[11px] text-muted-foreground mt-1">
+              </span>
+              <span class="text-[11px] text-muted-foreground mt-1 cursor-pointer block">
                 Centang opsi ini hanya jika Anda ingin merekonstruksi seluruh data.
-              </p>
+              </span>
             </div>
           </div>
 
